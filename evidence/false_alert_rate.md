@@ -1,4 +1,4 @@
-# False-alert rate — measured
+# False-alert rate - measured
 
 Submission Form Section 4 asks for a false-alert rate. mAP50 is a validation-set metric and
 says nothing about how often the deployed system cries wolf on real road video, so this was
@@ -12,7 +12,7 @@ measured directly.
 4. Open each incident's annotated evidence frame and label it **TP** (a real hazard of the
    reported class is inside the box) or **FP** (no such hazard there).
 
-Labelling is per **incident** — the operator-facing work item — not per raw detection,
+Labelling is per **incident** - the operator-facing work item - not per raw detection,
 because an operator triages incidents. 141 raw detections clustered into 10 incidents.
 
 ## Result
@@ -47,7 +47,7 @@ range (0.301 and 0.358).** Per class on this footage:
 | drain_overflow | 3 | 0 | 0% |
 | waterlogged_road | 3 | 0 | 0% |
 
-`pothole` fires on dark irregular patches — a road-edge shadow, and turbulent brown water —
+`pothole` fires on dark irregular patches - a road-edge shadow, and turbulent brown water -
 because that is the texture it learned. This is the trade the 0.30 threshold buys: it is
 deliberately permissive so real hazards are not missed, and the operator's **Reject (false
 positive)** action is the designed compensation.
@@ -62,7 +62,7 @@ not tune the threshold to flatter the number.
   clips, not a validated benchmark.
 - `Test_2` is a single physical event, so its 7 incidents are not 7 independent samples.
   Note that the same flooding produced both `drain_overflow` and `waterlogged_road`
-  incidents — both were counted TP, since an overflowing drain does waterlog the road.
+  incidents - both were counted TP, since an overflowing drain does waterlog the road.
   Clustering only merges within a class, so a multi-class event stays multi-incident.
 - Labelling was done by inspecting the stored evidence frames. The frames are committed, so
   the judgement is auditable and can be disputed row by row.
