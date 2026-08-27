@@ -55,3 +55,6 @@ parity_footage.json
 
 # build artifact of ml/export_onnx.py; the shipped copy is public/models/best.onnx
 ml/best.onnx
+
+CLAUDE.md
+AGENTS.md
