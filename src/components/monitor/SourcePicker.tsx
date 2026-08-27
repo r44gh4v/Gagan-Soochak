@@ -2,6 +2,7 @@
 
 import { Upload } from "lucide-react";
 import { useId, useRef } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,12 @@ export function SourcePicker({
   const setPatrolStartIso = useSessionStore((s) => s.setPatrolStartIso);
 
   const handleFile = (file: File) => {
+    // Some browsers report an empty type for less common containers, so only
+    // reject when we positively know it is not a video.
+    if (file.type && !file.type.startsWith("video/")) {
+      toast.error("That file is not a video", { description: file.name });
+      return;
+    }
     onSelect({
       url: URL.createObjectURL(file),
       label: file.name,
@@ -87,7 +94,7 @@ export function SourcePicker({
         id={inputId}
         ref={fileRef}
         type="file"
-        accept="video/*"
+        accept="video/*,.mp4,.webm,.mov,.m4v,.mkv,.avi"
         className="sr-only"
         onChange={(e) => {
           const file = e.target.files?.[0];

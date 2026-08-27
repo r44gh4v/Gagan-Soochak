@@ -1,5 +1,6 @@
 "use client";
 
+import { FileVideo } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DetectionTicker } from "@/components/monitor/DetectionTicker";
@@ -29,6 +30,7 @@ export default function MonitorPage() {
   const [source, setSource] = useState<VideoSource | null>(DEFAULT_SOURCE);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState({ current: 0, duration: 0 });
+  const [videoError, setVideoError] = useState<string | null>(null);
 
   const setRouteId = useSessionStore((s) => s.setRouteId);
   const setSourceLabel = useSessionStore((s) => s.setSourceLabel);
@@ -79,6 +81,7 @@ export default function MonitorPage() {
 
   const selectSource = (src: VideoSource) => {
     reset();
+    setVideoError(null);
     setSource((prev) => {
       // release the previous upload's blob URL
       if (prev?.isUpload) URL.revokeObjectURL(prev.url);
@@ -145,9 +148,24 @@ export default function MonitorPage() {
                       duration: e.currentTarget.duration || 0,
                     })
                   }
-                  onLoadedMetadata={(e) =>
-                    setTime({ current: 0, duration: e.currentTarget.duration || 0 })
-                  }
+                  onLoadedMetadata={(e) => {
+                    setVideoError(null);
+                    setTime({ current: 0, duration: e.currentTarget.duration || 0 });
+                  }}
+                  onError={(e) => {
+                    // Without this the stage just goes black and the operator
+                    // has no idea the browser could not decode their file.
+                    const err = e.currentTarget.error;
+                    setPlaying(false);
+                    stop();
+                    setVideoError(
+                      err?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
+                        ? "This browser can't decode that video. Chrome plays H.264/VP9/AV1 in .mp4 or .webm - HEVC/H.265 (common from iPhones) and some .mov files won't play. Re-encode to H.264 mp4 and try again."
+                        : err?.code === MediaError.MEDIA_ERR_DECODE
+                          ? "The video failed to decode partway through - the file may be corrupt or truncated."
+                          : "The video could not be loaded.",
+                    );
+                  }}
                 />
                 <canvas
                   ref={canvasRef}
@@ -155,7 +173,14 @@ export default function MonitorPage() {
                 />
               </>
               )}
-              {modelPhase !== "ready" && <ModelGate onRetry={() => void init()} />}
+              {videoError && (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-card/95 p-6 text-center">
+                <FileVideo className="size-8 text-muted-foreground" />
+                <div className="text-sm font-medium">Can&apos;t play this video</div>
+                <p className="max-w-md text-sm text-muted-foreground">{videoError}</p>
+              </div>
+            )}
+            {modelPhase !== "ready" && <ModelGate onRetry={() => void init()} />}
             </div>
           </div>
 
