@@ -126,7 +126,7 @@ export const useIncidentStore = create<IncidentState>()(
                       at: new Date().toISOString(),
                       actor: "System" as const,
                       action: "REPEAT_SIGHTING" as const,
-                      detail: `re-detected at ${location.landmark} · severity ${hazard.severity.score.toFixed(2)} (${level})${worse ? " — record upgraded" : ""}`,
+                      detail: `re-detected at ${location.landmark} · severity ${hazard.severity.score.toFixed(2)} (${level})${worse ? " - record upgraded" : ""}`,
                     },
                   ],
                 },
@@ -136,7 +136,7 @@ export const useIncidentStore = create<IncidentState>()(
           return { id: existing.id, merged: true };
         }
 
-        // Reserve the sequence number synchronously BEFORE any await — two
+        // Reserve the sequence number synchronously BEFORE any await - two
         // hazards on the same processed frame create concurrently, and both
         // reading seq across the IndexedDB awaits would mint the same id.
         const seq = get().seq + 1;
@@ -193,7 +193,7 @@ export const useIncidentStore = create<IncidentState>()(
         };
 
         set((s) => ({
-          // seq already committed above — re-writing it here would roll it
+          // seq already committed above - re-writing it here would roll it
           // back under a concurrent creation and re-open the id collision
           incidents: { ...s.incidents, [id]: incident },
           order: [id, ...s.order],

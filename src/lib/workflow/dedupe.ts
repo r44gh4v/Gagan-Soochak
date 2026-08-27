@@ -9,7 +9,7 @@ import type { Incident, IncidentLocation } from "@/lib/workflow/types";
  * The tracker drops a hazard once it leaves frame (HAZARD_EXPIRE_GAP), so a
  * single pothole a vehicle approaches, passes and glances back at produces
  * several independent tracks. Logging each as its own work item is what the
- * Python pipeline does — correct as a *detection* record, wrong as a *civic*
+ * Python pipeline does - correct as a *detection* record, wrong as a *civic*
  * one: it hands a ward engineer twenty tickets for one pothole and destroys
  * the operator's ability to act quickly.
  *
@@ -19,7 +19,7 @@ import type { Incident, IncidentLocation } from "@/lib/workflow/types";
  * is bookkeeping on top, and every merge is recorded in the audit trail.
  */
 
-/** Roughly one road segment either side — tight enough to keep distinct defects apart. */
+/** Roughly one road segment either side - tight enough to keep distinct defects apart. */
 export const DEDUPE_RADIUS_M = 25;
 
 /** Sightings further apart in time are treated as a fresh report. */

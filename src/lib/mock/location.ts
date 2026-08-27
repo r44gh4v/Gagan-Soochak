@@ -7,7 +7,7 @@ import type { IncidentLocation } from "@/lib/workflow/types";
  * The patrol vehicle advances along the route at a realistic speed, so a short
  * clip covers a short stretch of road. (Normalising video time across the full
  * route length instead put consecutive detections ~773 m apart on an 8.9 s
- * clip — one pothole would appear in four different wards.)
+ * clip - one pothole would appear in four different wards.)
  *
  * Same video position always yields identical coordinates, so a re-run
  * reproduces identical evidence.

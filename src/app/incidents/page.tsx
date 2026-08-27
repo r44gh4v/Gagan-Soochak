@@ -104,7 +104,7 @@ function QueueContent() {
   }, [all, filters]);
 
   // Bulk actions and the count operate only on rows the operator can
-  // currently SEE — narrowing a filter after select-all must not let a bulk
+  // currently SEE - narrowing a filter after select-all must not let a bulk
   // reject silently push invisible incidents into a terminal state.
   const visibleSelected = useMemo(() => {
     if (selected.size === 0) return selected;

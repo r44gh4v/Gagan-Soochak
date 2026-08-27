@@ -21,7 +21,7 @@ VIDEO = sys.argv[1] if len(sys.argv) > 1 else "../public/videos/test_video.mp4"
 T = float(sys.argv[2]) if len(sys.argv) > 2 else 4.0
 CONF = 0.3
 IOU = 0.45
-RESIZE = (640, 720)  # w, h — pipeline.py L44
+RESIZE = (640, 720)  # w, h - pipeline.py L44
 SIZE = 640
 
 

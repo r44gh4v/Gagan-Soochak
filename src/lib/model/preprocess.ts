@@ -4,11 +4,11 @@ import type { PreMeta } from "@/lib/model/types";
 /**
  * Replicates pipeline.py's exact two-step transform:
  *
- *   1. cv2.resize(frame, (640, 720))  — stretch, aspect DELIBERATELY distorted
+ *   1. cv2.resize(frame, (640, 720))  - stretch, aspect DELIBERATELY distorted
  *   2. Ultralytics letterbox 640×720 → 640×640 (aspect preserved, gray 114 pad)
  *
  * Step 1 is done by the caller via createImageBitmap's resizeWidth/resizeHeight
- * (native, and far cheaper than a canvas drawImage of a full-resolution frame —
+ * (native, and far cheaper than a canvas drawImage of a full-resolution frame -
  * on a 1080×1920 clip the canvas route starved the frame loop). The incoming
  * bitmap is therefore already RESIZE_DIM; this function only letterboxes it.
  *

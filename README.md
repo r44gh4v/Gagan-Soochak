@@ -63,7 +63,7 @@ Verified on a production build (`next build && next start`):
 | Inference in production | WebGPU bound, ~39 ms/frame, 0 console errors |
 | Cross-origin requests | none |
 
-`public/ort/` is **generated at build time** by `scripts/copy-ort.mjs` and is gitignored —
+`public/ort/` is **generated at build time** by `scripts/copy-ort.mjs` and is gitignored -
 do not commit it. Only the two runtime variants the app can bind (WebGPU `jsep` + threaded
 WASM fallback) are staged, which keeps ~42 MB out of every deployment. `.vercelignore`
 excludes `ml/`, `evidence/` and `docs/` from the upload; they stay in the GitHub repo for
@@ -133,8 +133,12 @@ recommended action (class × severity playbook) · SLA guidance · status · aud
 - **Validation mAP50** (20% held-out): pothole **0.893** · waterlogged_road **0.743** ·
   drain_overflow **0.720** - all clear the proposal's 0.70 target. drain_overflow is over
   ~16 validation instances; treat with wide error bars.
-- **Browser inference** (dev machine, WebGPU, production build): ~39 ms/frame, ~30 Hz
-  sampling at N=2. Python CPU baseline: 7.7 FPS unskipped / ~14-15 at N=2.
+- **Browser inference** (dev machine, WebGPU, production build): ~39-58 ms per inference,
+  ~30 Hz sampling at N=2. Python CPU baseline: 7.7 FPS unskipped / ~14-15 at N=2.
+- **False-alert rate**: **2 of 10 incidents (20%)** on the two bundled clips, labelled
+  per-incident against the stored evidence frames - `evidence/false_alert_rate.md`. Both
+  errors were `pothole` class below 0.36 confidence; the water/drain classes had none.
+- **Clustering**: 141 raw detections became 10 work items (21 repeat sightings merged).
 - **Runtime parity**: identical model output across Python and browser to 4-5 significant
   figures - `evidence/parity_check.md`.
 - Live session numbers are on the **Analytics** page, clearly separated from training
