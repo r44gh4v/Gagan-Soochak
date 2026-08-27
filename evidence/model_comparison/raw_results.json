@@ -1,0 +1,91 @@
+{
+  "best.pt": {
+    "names": {
+      "0": "pothole",
+      "1": "waterlogged_road",
+      "2": "drain_overflow"
+    },
+    "per_clip": {
+      "Test_1_Pothole.mp4": {
+        "frames_sampled": 18,
+        "detections": {
+          "pothole": {
+            "n": 8,
+            "mean_conf": 0.532,
+            "max_conf": 0.856
+          }
+        },
+        "total": 8
+      },
+      "Test_2.mp4": {
+        "frames_sampled": 45,
+        "detections": {
+          "drain_overflow": {
+            "n": 6,
+            "mean_conf": 0.409,
+            "max_conf": 0.492
+          },
+          "pothole": {
+            "n": 4,
+            "mean_conf": 0.393,
+            "max_conf": 0.45
+          },
+          "waterlogged_road": {
+            "n": 2,
+            "mean_conf": 0.328,
+            "max_conf": 0.343
+          }
+        },
+        "total": 12
+      }
+    },
+    "latency": {
+      "mean_ms": 379.2,
+      "p95_ms": 341.8
+    }
+  },
+  "better.pt": {
+    "names": {
+      "0": "pothole",
+      "1": "waterlogged_road"
+    },
+    "per_clip": {
+      "Test_1_Pothole.mp4": {
+        "frames_sampled": 18,
+        "detections": {
+          "pothole": {
+            "n": 24,
+            "mean_conf": 0.588,
+            "max_conf": 0.871
+          },
+          "waterlogged_road": {
+            "n": 1,
+            "mean_conf": 0.406,
+            "max_conf": 0.406
+          }
+        },
+        "total": 25
+      },
+      "Test_2.mp4": {
+        "frames_sampled": 45,
+        "detections": {
+          "pothole": {
+            "n": 30,
+            "mean_conf": 0.456,
+            "max_conf": 0.787
+          },
+          "waterlogged_road": {
+            "n": 1,
+            "mean_conf": 0.578,
+            "max_conf": 0.578
+          }
+        },
+        "total": 31
+      }
+    },
+    "latency": {
+      "mean_ms": 816.4,
+      "p95_ms": 860.8
+    }
+  }
+}
