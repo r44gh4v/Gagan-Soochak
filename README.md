@@ -47,10 +47,27 @@ That's it - no Python, no GPU, no env vars. The trained model ships in
 into the Queue; open one to drive the workflow. The `⋯` menu has **Load demo data** (12
 seeded incidents, clearly badged) if you want to explore the queue without running video.
 
-### Deploy
+### Deploy (Vercel)
 
-Push to GitHub → import in Vercel → deploy. No configuration needed. `next.config.ts` sets
-COOP/COEP headers (threaded WASM) and immutable caching for the model.
+Push to GitHub → import the repo in Vercel → deploy. **No configuration and no environment
+variables.** Framework preset auto-detects Next.js; `npm run build` triggers the `prebuild`
+step that stages the ONNX Runtime binaries.
+
+Verified on a production build (`next build && next start`):
+
+| Check | Result |
+|---|---|
+| COOP / COEP on all routes | `same-origin` / `require-corp` → `crossOriginIsolated === true` |
+| `/models/best.onnx` | `200`, `Cache-Control: public, max-age=31536000, immutable` |
+| `/ort/*.wasm` | `200`, immutable |
+| Inference in production | WebGPU bound, ~39 ms/frame, 0 console errors |
+| Cross-origin requests | none |
+
+`public/ort/` is **generated at build time** by `scripts/copy-ort.mjs` and is gitignored —
+do not commit it. Only the two runtime variants the app can bind (WebGPU `jsep` + threaded
+WASM fallback) are staged, which keeps ~42 MB out of every deployment. `.vercelignore`
+excludes `ml/`, `evidence/` and `docs/` from the upload; they stay in the GitHub repo for
+reviewers but are not needed to build or run the dashboard.
 
 ## Architecture
 
@@ -58,21 +75,23 @@ COOP/COEP headers (threaded WASM) and immutable caching for the model.
 Browser (everything runs here after page load)
 │
 ├─ MAIN THREAD
-│   <video> ── requestVideoFrameCallback loop
-│       ├─ every Nth frame (N=2 default) ── createImageBitmap ──▶ Worker
-│       └─ EVERY frame: draw tracker.active boxes on <canvas> overlay
+│   <video>
+│    ├─ setInterval sampling ~30 Hz, act on every Nth tick (N=2 → ~15 Hz)
+│    │     └─ createImageBitmap(resize 640×720) ──transfer──▶ Worker
+│    └─ requestAnimationFrame: draw tracker.active boxes on <canvas> overlay
 │
 ├─ WEB WORKER (inference.worker.ts)
-│   stretch 640×720 → letterbox 640×640 → Float32 NCHW
+│   letterbox 640×640 (gray 114 pad) → Float32 NCHW
 │   → onnxruntime-web (WebGPU, WASM fallback) → [1,7,8400]
 │   → conf ≥ 0.30 → per-class NMS → un-letterbox → detections
 │
 └─ MAIN THREAD
     HazardTracker (centroid match, ported from pipeline.py)
       └─ severity = 0.6·spatial + 0.4·temporal
-           └─ Incident store (Zustand)
-                ├─ metadata → localStorage
-                └─ evidence JPEGs → IndexedDB
+           └─ repeat-sighting clustering (same class, <25 m, <30 min)
+                └─ Incident store (Zustand)
+                     ├─ metadata → localStorage
+                     └─ evidence JPEGs → IndexedDB
 ```
 
 Key modules:
@@ -114,8 +133,8 @@ recommended action (class × severity playbook) · SLA guidance · status · aud
 - **Validation mAP50** (20% held-out): pothole **0.893** · waterlogged_road **0.743** ·
   drain_overflow **0.720** - all clear the proposal's 0.70 target. drain_overflow is over
   ~16 validation instances; treat with wide error bars.
-- **Browser inference** (dev machine, WebGPU): ~35 ms/frame, video-rate 24.9 effective FPS
-  at N=2. Python CPU baseline: 7.7 FPS unskipped / ~14-15 at N=2.
+- **Browser inference** (dev machine, WebGPU, production build): ~39 ms/frame, ~30 Hz
+  sampling at N=2. Python CPU baseline: 7.7 FPS unskipped / ~14-15 at N=2.
 - **Runtime parity**: identical model output across Python and browser to 4-5 significant
   figures - `evidence/parity_check.md`.
 - Live session numbers are on the **Analytics** page, clearly separated from training
