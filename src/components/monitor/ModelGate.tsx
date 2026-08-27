@@ -10,7 +10,7 @@ const fmtMB = (b: number) => (b / 1024 / 1024).toFixed(1);
 
 /**
  * Blocks the monitor until the on-device model is ready. The download IS a
- * demo beat — it proves inference happens on the operator's machine.
+ * demo beat - it proves inference happens on the operator's machine.
  */
 export function ModelGate({ onRetry }: { onRetry: () => void }) {
   const model = useSessionStore((s) => s.model);
@@ -24,7 +24,7 @@ export function ModelGate({ onRetry }: { onRetry: () => void }) {
           <ShieldAlert className="size-8 text-red-600" />
           <div className="text-sm font-medium">Model failed to load</div>
           <div className="max-w-sm text-sm text-muted-foreground">
-            {model.message}. Check the network connection — the model downloads
+            {model.message}. Check the network connection - the model downloads
             once (~12 MB) and is cached for offline use afterwards.
           </div>
           <Button size="sm" onClick={onRetry}>

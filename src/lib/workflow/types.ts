@@ -42,7 +42,7 @@ export type IncidentLocation = {
   landmark: string;
   zone: string;
   ward: string;
-  /** Always true in this build — GPS is interpolated along a mock patrol route. */
+  /** Always true in this build - GPS is interpolated along a mock patrol route. */
   simulated: true;
 };
 

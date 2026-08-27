@@ -16,8 +16,8 @@ import { IncidentCard } from "@/components/incidents/IncidentCard";
 import { IncidentTable } from "@/components/incidents/IncidentTable";
 import { Button } from "@/components/ui/button";
 import { SEVERITY_ORDER } from "@/lib/detection/constants";
-import { ACTIVE_STATUSES } from "@/lib/workflow/lifecycle";
-import type { Incident, IncidentStatus } from "@/lib/workflow/types";
+import { ACTIVE_STATUSES, canTransition } from "@/lib/workflow/lifecycle";
+import type { Incident } from "@/lib/workflow/types";
 import { suggestedOwnerFor, useIncidentStore } from "@/store/incidents";
 
 const PRIORITY_ORDER = { P1: 0, P2: 1, P3: 2 } as const;
@@ -100,9 +100,18 @@ function QueueContent() {
       );
   }, [all, filters]);
 
+  // Bulk actions and the count operate only on rows the operator can
+  // currently SEE — narrowing a filter after select-all must not let a bulk
+  // reject silently push invisible incidents into a terminal state.
+  const visibleSelected = useMemo(() => {
+    if (selected.size === 0) return selected;
+    const visible = new Set(filtered.map((i) => i.id));
+    return new Set([...selected].filter((id) => visible.has(id)));
+  }, [selected, filtered]);
+
   const bulkAssign = () => {
     let n = 0;
-    for (const id of selected) {
+    for (const id of visibleSelected) {
       const inc = incidents[id];
       if (inc?.status === "open") {
         assignOwner(id, suggestedOwnerFor(inc));
@@ -114,8 +123,13 @@ function QueueContent() {
   };
 
   const bulkReject = () => {
-    const ids = [...selected];
-    bulkTransition(ids, "rejected" as IncidentStatus, "bulk-rejected by operator");
+    // Count only incidents the lifecycle actually allows into `rejected`, so
+    // the toast never over-reports (resolved/closed rows are skipped).
+    const ids = [...visibleSelected].filter((id) => {
+      const inc = incidents[id];
+      return inc && canTransition(inc.status, "rejected");
+    });
+    bulkTransition(ids, "rejected", "bulk-rejected by operator");
     toast(`${ids.length} incident${ids.length === 1 ? "" : "s"} rejected`);
     setSelected(new Set());
   };
@@ -125,7 +139,7 @@ function QueueContent() {
       <EmptyState
         icon={Inbox}
         title="No incidents yet"
-        description="Run a clip on the Monitor to start detecting hazards — every detection lands here as an incident with evidence."
+        description="Run a clip on the Monitor to start detecting hazards - every detection lands here as an incident with evidence."
         actionLabel="Open Monitor"
         actionHref="/monitor"
       />
@@ -142,10 +156,10 @@ function QueueContent() {
       />
 
       <div className="flex items-center gap-2">
-        {selected.size > 0 ? (
+        {visibleSelected.size > 0 ? (
           <>
             <span className="text-xs text-muted-foreground">
-              {selected.size} selected
+              {visibleSelected.size} selected
             </span>
             <Button size="sm" variant="outline" className="h-7 text-xs" onClick={bulkAssign}>
               Assign suggested
@@ -185,7 +199,7 @@ function QueueContent() {
       {view === "table" ? (
         <IncidentTable
           incidents={filtered}
-          selected={selected}
+          selected={visibleSelected}
           onSelectedChange={setSelected}
         />
       ) : (

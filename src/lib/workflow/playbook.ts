@@ -1,7 +1,7 @@
 import type { HazardClass, SeverityLevel } from "@/lib/detection/constants";
 
 /**
- * Recommended response per hazard class × severity — the "what should be done"
+ * Recommended response per hazard class × severity - the "what should be done"
  * a graded deliverable asks for. Kept specific and municipally plausible.
  */
 const PLAYBOOK: Record<HazardClass, Record<SeverityLevel, string>> = {
@@ -18,7 +18,7 @@ const PLAYBOOK: Record<HazardClass, Record<SeverityLevel, string>> = {
     Low: "Log for monsoon-preparedness survey. Verify inlet gradient during dry-weather inspection.",
   },
   drain_overflow: {
-    High: "Dispatch emergency desilting crew within 4 h. Cordon the footpath. Raise BWSSB sewage-mix check — public-health risk.",
+    High: "Dispatch emergency desilting crew within 4 h. Cordon the footpath. Raise BWSSB sewage-mix check - public-health risk.",
     Medium: "Schedule desilting within 24 h. Inspect upstream manholes for blockage.",
     Low: "Add to fortnightly desilting round. Check manhole cover seating.",
   },

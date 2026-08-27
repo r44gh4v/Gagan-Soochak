@@ -8,7 +8,7 @@ import { suggestOwner } from "@/lib/workflow/routing";
 import type { AuditEntry, Incident } from "@/lib/workflow/types";
 
 /**
- * Seeded demo incidents — clearly badged "SEED" in their source label and
+ * Seeded demo incidents - clearly badged "SEED" in their source label and
  * evidence images. Demo-day insurance (a cold dashboard is a bad first
  * impression) and the deterministic dataset used to exercise the workflow
  * without running detection. Never mixed silently with real detections.
@@ -68,7 +68,7 @@ async function seedImage(
   ctx.fillText(label, 8, 18);
   ctx.fillStyle = "#a1a1aa";
   ctx.font = `500 ${Math.max(10, h / 18)}px system-ui`;
-  ctx.fillText("SEED DATA — not a real detection", 8, h - 10);
+  ctx.fillText("SEED DATA - not a real detection", 8, h - 10);
   return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
 }
 
@@ -84,8 +84,12 @@ export async function buildSeedIncidents(patrolStartIso: string): Promise<Incide
     const priority = priorityFor(s.cls, level);
     const location = locationAt("ec-hosur-road", s.videoTime, 60);
     const detectedAt = new Date(base + s.videoTime * 1000).toISOString();
+    // Rejected seeds went straight open -> rejected (their audit trail has no
+    // ASSIGNED entry), so an owner would contradict the history the UI shows.
     const owner =
-      s.status === "open" ? null : suggestOwner(s.cls, location.zone);
+      s.status === "open" || s.status === "rejected"
+        ? null
+        : suggestOwner(s.cls, location.zone);
 
     const label = `${CLASS_LABELS[s.cls]} ${s.conf.toFixed(2)} (${level})`;
     const [thumbnail, frame] = await Promise.all([
@@ -117,7 +121,7 @@ export async function buildSeedIncidents(patrolStartIso: string): Promise<Incide
       audit.push({ at: later(220), actor: "Operator", action: "VERIFIED_CLOSED" });
     }
     if (s.status === "rejected") {
-      audit.push({ at: later(8), actor: "Operator", action: "REJECTED", detail: "false positive — wet shadow patch, no physical hazard" });
+      audit.push({ at: later(8), actor: "Operator", action: "REJECTED", detail: "false positive - wet shadow patch, no physical hazard" });
     }
     if (s.escalated) {
       audit.push({ at: later(90), actor: "Operator", action: "ESCALATED", detail: "no crew response within target window" });
@@ -149,7 +153,7 @@ export async function buildSeedIncidents(patrolStartIso: string): Promise<Incide
       },
       status: s.status,
       owner: s.escalated && owner
-        ? { ...owner, department: `${owner.department} (Escalated — Ward Engineer)` }
+        ? { ...owner, department: `${owner.department} (Escalated - Ward Engineer)` }
         : owner,
       recommendedAction: recommendAction(s.cls, level),
       slaTargetHours: SLA_HOURS[escalatedPriority],
@@ -161,7 +165,7 @@ export async function buildSeedIncidents(patrolStartIso: string): Promise<Incide
         : null,
       rejectionReason:
         s.status === "rejected"
-          ? "false positive — wet shadow patch, no physical hazard"
+          ? "false positive - wet shadow patch, no physical hazard"
           : null,
       closedAt: s.status === "closed" ? later(220) : null,
       sightings: Math.max(1, Math.round(s.temporal * 10)),

@@ -28,7 +28,7 @@ export async function fetchModelBuffer(
       return { buffer, fromCache: true };
     }
   } catch {
-    // Cache Storage unavailable (rare; e.g. some private modes) — plain fetch.
+    // Cache Storage unavailable (rare; e.g. some private modes) - plain fetch.
   }
 
   const res = await fetch(MODEL_URL);
@@ -64,7 +64,7 @@ export async function fetchModelBuffer(
         }),
       );
     } catch {
-      // Quota or private mode — model still works this session.
+      // Quota or private mode - model still works this session.
     }
   }
 

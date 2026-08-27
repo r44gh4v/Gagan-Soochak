@@ -64,7 +64,11 @@ export const useIncidentStore = create<IncidentState>()(
       seq: 0,
 
       createFromHazard: async (hazard, ctx, evidence) => {
+        // Reserve the sequence number synchronously BEFORE any await — two
+        // hazards on the same processed frame create concurrently, and both
+        // reading seq across the IndexedDB awaits would mint the same id.
         const seq = get().seq + 1;
+        set({ seq });
         const id = `INC-${new Date().getFullYear()}-${String(seq).padStart(4, "0")}`;
 
         // Blobs land in IndexedDB first, so a stored incident never points
@@ -122,9 +126,10 @@ export const useIncidentStore = create<IncidentState>()(
         };
 
         set((s) => ({
+          // seq already committed above — re-writing it here would roll it
+          // back under a concurrent creation and re-open the id collision
           incidents: { ...s.incidents, [id]: incident },
           order: [id, ...s.order],
-          seq,
         }));
         return id;
       },
@@ -144,7 +149,7 @@ export const useIncidentStore = create<IncidentState>()(
                 severityBreakdown: breakdown,
                 sightings,
                 // severity change re-derives priority/playbook only while
-                // still open — an operator's triage decisions are not
+                // still open - an operator's triage decisions are not
                 // silently overwritten afterwards
                 ...(inc.status === "open"
                   ? {
@@ -253,7 +258,7 @@ export const useIncidentStore = create<IncidentState>()(
     }),
     {
       name: "gagan-soochak-incidents",
-      // metadata only — evidence blobs live in IndexedDB
+      // metadata only - evidence blobs live in IndexedDB
     },
   ),
 );

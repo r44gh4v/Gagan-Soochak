@@ -141,7 +141,7 @@ export function IncidentTable({
               </TableCell>
               <TableCell>
                 <div className="max-w-36 truncate text-xs text-muted-foreground">
-                  {inc.owner ? inc.owner.department : "—"}
+                  {inc.owner ? inc.owner.department : "-"}
                 </div>
               </TableCell>
               <TableCell

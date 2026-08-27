@@ -13,7 +13,7 @@ const ACTION_LABELS: Record<AuditEntry["action"], string> = {
   ESCALATED: "Escalated",
 };
 
-/** Who did what, when — the literal answer to "how is status tracked?" */
+/** Who did what, when - the literal answer to "how is status tracked?" */
 export function AuditTimeline({ entries }: { entries: AuditEntry[] }) {
   const newest = [...entries].reverse();
   return (

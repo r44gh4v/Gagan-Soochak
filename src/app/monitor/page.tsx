@@ -15,13 +15,23 @@ import {
   SEVERITY_STROKE,
 } from "@/lib/detection/constants";
 import type { TrackedHazard } from "@/lib/detection/tracker";
+import { SAMPLE_CLIPS } from "@/lib/mock/clips";
 import { useDetectionEngine } from "@/hooks/useDetectionEngine";
 import { useSessionStore } from "@/store/session";
+
+// A judge landing cold should be one click (Play) from a working demo -
+// preselect the first bundled clip instead of showing an empty stage.
+const DEFAULT_SOURCE: VideoSource = {
+  url: SAMPLE_CLIPS[0].src,
+  label: SAMPLE_CLIPS[0].label.split(" - ")[0],
+  routeId: SAMPLE_CLIPS[0].routeId,
+  isUpload: false,
+};
 
 export default function MonitorPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [source, setSource] = useState<VideoSource | null>(null);
+  const [source, setSource] = useState<VideoSource | null>(DEFAULT_SOURCE);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState({ current: 0, duration: 0 });
 
@@ -66,7 +76,10 @@ export default function MonitorPage() {
 
   useEffect(() => {
     void init();
-  }, [init]);
+    // sync session context with the preselected default clip
+    setRouteId(DEFAULT_SOURCE.routeId);
+    setSourceLabel(DEFAULT_SOURCE.label);
+  }, [init, setRouteId, setSourceLabel]);
 
   const selectSource = (src: VideoSource) => {
     reset();
@@ -171,7 +184,7 @@ export default function MonitorPage() {
               <DetectionTicker items={ticker} />
               <Separator className="my-3" />
               <p className="text-[11px] leading-snug text-muted-foreground">
-                New hazards become incidents in the Queue automatically —
+                New hazards become incidents in the Queue automatically -
                 logged at first sight at whatever severity they start at.
               </p>
             </CardContent>

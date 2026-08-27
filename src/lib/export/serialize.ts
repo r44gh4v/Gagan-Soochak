@@ -3,7 +3,7 @@ import type { Incident } from "@/lib/workflow/types";
 /**
  * Evidence export. CSV is flat and Excel-friendly; JSON carries the full
  * incident objects plus a run header describing exactly how the session was
- * configured. `location_source` is literally "simulated" in every row —
+ * configured. `location_source` is literally "simulated" in every row -
  * honesty survives the export.
  */
 

@@ -20,7 +20,7 @@ export type PreMeta = {
   /** Letterbox padding in model space. */
   padX: number;
   padY: number;
-  /** Original frame dims — final rescale from 640×720 space to source px. */
+  /** Original frame dims - final rescale from 640×720 space to source px. */
   srcW: number;
   srcH: number;
 };

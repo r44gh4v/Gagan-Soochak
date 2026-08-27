@@ -1,0 +1,33 @@
+{
+  "video": "../public/videos/Test_Video2.mp4",
+  "t_seconds": 4.5,
+  "frame_shape": [
+    480,
+    854,
+    3
+  ],
+  "pt_ultralytics": [
+    {
+      "cls": "drain_overflow",
+      "conf": 0.4922,
+      "box": [
+        238,
+        150,
+        608,
+        304
+      ]
+    }
+  ],
+  "onnx_webmath": [
+    {
+      "cls": "drain_overflow",
+      "conf": 0.4963,
+      "box": [
+        239,
+        150,
+        636,
+        316
+      ]
+    }
+  ]
+}

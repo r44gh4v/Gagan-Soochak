@@ -23,7 +23,7 @@ export type PatrolRoute = {
 export const ROUTES: PatrolRoute[] = [
   {
     id: "ec-hosur-road",
-    label: "Hosur Road Corridor — EC Flyover → Bommasandra",
+    label: "Hosur Road Corridor - EC Flyover → Bommasandra",
     waypoints: [
       { lat: 12.8452, lng: 77.6602, landmark: "Electronic City Flyover (Toll Plaza)", zone: "EC Phase 1", ward: "Bommanahalli" },
       { lat: 12.8465, lng: 77.6625, landmark: "Infosys Gate 1, Hosur Road", zone: "EC Phase 1", ward: "Bommanahalli" },
@@ -35,7 +35,7 @@ export const ROUTES: PatrolRoute[] = [
   },
   {
     id: "ec-inner-roads",
-    label: "EC Inner Roads — Konappana Agrahara Loop",
+    label: "EC Inner Roads - Konappana Agrahara Loop",
     waypoints: [
       { lat: 12.85, lng: 77.662, landmark: "Konappana Agrahara Main Road", zone: "EC Phase 1", ward: "Bommanahalli" },
       { lat: 12.8563, lng: 77.6482, landmark: "Doddathoguru Village Road", zone: "Doddathoguru", ward: "Bommanahalli" },

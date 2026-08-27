@@ -8,7 +8,7 @@ const STYLES: Record<SeverityLevel, string> = {
 };
 
 /**
- * The one saturated fill in the UI. Always carries its text label — severity
+ * The one saturated fill in the UI. Always carries its text label - severity
  * is never communicated by color alone.
  */
 export function SeverityChip({

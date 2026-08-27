@@ -14,7 +14,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 /**
- * Confirmation with a required reason — used only for irreversible actions
+ * Confirmation with a required reason - used only for irreversible actions
  * (reject, close). The reason is a workflow field, not friction: it lands in
  * the audit trail and the CSV export.
  */

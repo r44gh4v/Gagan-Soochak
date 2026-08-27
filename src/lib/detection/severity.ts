@@ -10,9 +10,9 @@ import type { BBox } from "@/lib/model/types";
 export type SeverityResult = {
   score: number;
   level: SeverityLevel;
-  /** bbox_area / frame_area — how much of the frame the hazard occupies. */
+  /** bbox_area / frame_area - how much of the frame the hazard occupies. */
   spatial: number;
-  /** min(consecutive, window) / window — how long it has persisted. */
+  /** min(consecutive, window) / window - how long it has persisted. */
   temporal: number;
 };
 

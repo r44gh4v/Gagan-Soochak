@@ -8,7 +8,7 @@ import type { AuditAction, Incident, IncidentStatus } from "@/lib/workflow/types
  *    └────────┴────────────┴─ reject (false positive) → rejected
  *
  * closed / rejected are terminal. Every mutation flows through transition()
- * so an audit entry is stamped on every change — no ad-hoc status writes.
+ * so an audit entry is stamped on every change - no ad-hoc status writes.
  */
 export const TRANSITIONS: Record<IncidentStatus, IncidentStatus[]> = {
   open: ["assigned", "rejected"],

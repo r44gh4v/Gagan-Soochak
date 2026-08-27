@@ -42,7 +42,7 @@ const STATUSES: IncidentStatus[] = [
   "rejected",
 ];
 
-/** Trained-model validation metrics — static, from Technical Build Notes §3. */
+/** Trained-model validation metrics - static, from Technical Build Notes §3. */
 const VAL_MAP50 = [
   { cls: "pothole", map50: 0.893, note: "608 source images" },
   { cls: "waterlogged_road", map50: 0.743, note: "1,499 source images" },
@@ -105,7 +105,7 @@ export default function AnalyticsPage() {
       <EmptyState
         icon={BarChart3}
         title="No session data yet"
-        description="Analytics fill in as detections run — open the Monitor and play a clip."
+        description="Analytics fill in as detections run - open the Monitor and play a clip."
         actionLabel="Open Monitor"
         actionHref="/monitor"
       />
@@ -226,17 +226,17 @@ export default function AnalyticsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">
-              Model performance — measured this session
+              Model performance - measured this session
             </CardTitle>
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
               {(
                 [
-                  ["Backend", model.phase === "ready" ? (model.backend === "webgpu" ? "WebGPU" : "WASM (threaded)") : "—"],
-                  ["Avg inference", avgMs ? `${avgMs.toFixed(1)} ms` : "—"],
-                  ["p95 inference", p95InferenceMs(perf) ? `${p95InferenceMs(perf).toFixed(1)} ms` : "—"],
-                  ["Effective FPS", effectiveFps(perf) ? effectiveFps(perf).toFixed(1) : "—"],
+                  ["Backend", model.phase === "ready" ? (model.backend === "webgpu" ? "WebGPU" : "WASM (threaded)") : "-"],
+                  ["Avg inference", avgMs ? `${avgMs.toFixed(1)} ms` : "-"],
+                  ["p95 inference", p95InferenceMs(perf) ? `${p95InferenceMs(perf).toFixed(1)} ms` : "-"],
+                  ["Effective FPS", effectiveFps(perf) ? effectiveFps(perf).toFixed(1) : "-"],
                   ["Frames seen", String(perf.framesSeen)],
                   ["Frames processed", `${perf.framesProcessed} (every ${skipN})`],
                   ["Raw detections", String(perf.detections)],
@@ -253,7 +253,7 @@ export default function AnalyticsPage() {
             </dl>
             <p className="mt-3 text-[11px] leading-snug text-muted-foreground">
               Reference: the Python edge pipeline measured 7.7 FPS unskipped /
-              ~14–15 FPS at N=2 on a laptop CPU (Technical Build Notes §4).
+              ~14-15 FPS at N=2 on a laptop CPU (Technical Build Notes §4).
             </p>
           </CardContent>
         </Card>
@@ -289,7 +289,7 @@ export default function AnalyticsPage() {
             <p className="mt-3 text-[11px] leading-snug text-muted-foreground">
               YOLOv8n, 100 epochs, 20% held-out split. All classes clear the
               proposal&apos;s 0.70 target. drain_overflow&apos;s figure is over ~16
-              validation instances — treat it with wide error bars. These are
+              validation instances - treat it with wide error bars. These are
               training-time numbers, distinct from the live session
               measurements on the left.
             </p>

@@ -1,0 +1,43 @@
+{
+  "video": "../public/videos/test_video.mp4",
+  "t_seconds": 0.0,
+  "frame_shape": [
+    1920,
+    1080,
+    3
+  ],
+  "pt_ultralytics": [
+    {
+      "cls": "pothole",
+      "conf": 0.8562,
+      "box": [
+        236,
+        830,
+        349,
+        969
+      ]
+    }
+  ],
+  "onnx_webmath": [
+    {
+      "cls": "pothole",
+      "conf": 0.8361,
+      "box": [
+        239,
+        831,
+        348,
+        968
+      ]
+    },
+    {
+      "cls": "pothole",
+      "conf": 0.4036,
+      "box": [
+        6,
+        747,
+        78,
+        828
+      ]
+    }
+  ]
+}

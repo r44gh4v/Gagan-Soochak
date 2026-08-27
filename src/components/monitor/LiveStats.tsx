@@ -10,15 +10,15 @@ export function LiveStats() {
     perf.framesProcessed > 0 ? perf.inferenceMsTotal / perf.framesProcessed : 0;
 
   const stats: [string, string][] = [
-    ["Inference", perf.inferenceMsLast ? `${Math.round(perf.inferenceMsLast)} ms` : "—"],
-    ["Avg", avgMs ? `${Math.round(avgMs)} ms` : "—"],
-    ["Effective FPS", effectiveFps(perf) ? effectiveFps(perf).toFixed(1) : "—"],
+    ["Inference", perf.inferenceMsLast ? `${Math.round(perf.inferenceMsLast)} ms` : "-"],
+    ["Avg", avgMs ? `${Math.round(avgMs)} ms` : "-"],
+    ["Effective FPS", effectiveFps(perf) ? effectiveFps(perf).toFixed(1) : "-"],
     ["Frames processed", String(perf.framesProcessed)],
     ["Detections", String(perf.detections)],
     ["Incidents", String(perf.incidentsCreated)],
     [
       "Backend",
-      model.phase === "ready" ? (model.backend === "webgpu" ? "WebGPU" : "WASM") : "—",
+      model.phase === "ready" ? (model.backend === "webgpu" ? "WebGPU" : "WASM") : "-",
     ],
   ];
 

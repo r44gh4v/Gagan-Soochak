@@ -1,7 +1,7 @@
 import { createStore, del, get, keys, set } from "idb-keyval";
 
 /**
- * Evidence JPEGs live in IndexedDB, NOT localStorage — base64 frames would
+ * Evidence JPEGs live in IndexedDB, NOT localStorage - base64 frames would
  * blow the ~5 MB localStorage quota within a couple dozen incidents. Incident
  * metadata (small, serialisable) persists separately via zustand/persist.
  */

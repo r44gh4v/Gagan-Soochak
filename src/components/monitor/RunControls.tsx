@@ -60,7 +60,7 @@ export function RunControls({
           onValueChange={([v]) => setSkipN(v)}
         />
         <p className="text-[11px] leading-snug text-muted-foreground">
-          Default 2 matches the edge pipeline — ~12–15 Hz effective sampling.
+          Default 2 matches the edge pipeline - ~12-15 Hz effective sampling.
         </p>
       </div>
 
@@ -79,7 +79,7 @@ export function RunControls({
           onValueChange={([v]) => setConf(v)}
         />
         <p className="text-[11px] leading-snug text-muted-foreground">
-          Edge pipeline runs at 0.30 — permissive by design; the Reject action
+          Edge pipeline runs at 0.30 - permissive by design; the Reject action
           handles the false positives it admits.
         </p>
       </div>

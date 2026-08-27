@@ -32,7 +32,7 @@ export function SourcePicker({
     onSelect({
       url: URL.createObjectURL(file),
       label: file.name,
-      routeId: "ec-hosur-road", // no route binding for uploads — assumed, disclosed
+      routeId: "ec-hosur-road", // no route binding for uploads - assumed, disclosed
       isUpload: true,
     });
   };
@@ -53,7 +53,7 @@ export function SourcePicker({
           onClick={() =>
             onSelect({
               url: clip.src,
-              label: clip.label.split(" — ")[0],
+              label: clip.label.split(" - ")[0],
               routeId: clip.routeId,
               isUpload: false,
             })
@@ -66,10 +66,10 @@ export function SourcePicker({
           <Film className="size-4 text-muted-foreground" />
           <span>
             <span className="block font-medium leading-tight">
-              {clip.label.split(" — ")[0]}
+              {clip.label.split(" - ")[0]}
             </span>
             <span className="block text-xs leading-tight text-muted-foreground">
-              {clip.label.split(" — ")[1]}
+              {clip.label.split(" - ")[1]}
             </span>
           </span>
         </button>

@@ -13,9 +13,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Gagan Soochak — Civic Hazard Operations",
+  title: "Gagan Soochak - Civic Hazard Operations",
   description:
-    "On-device drone/dashcam hazard detection and civic repair workflow for Electronic City, Bengaluru. Potholes, waterlogging and drain overflow — detected in your browser, tracked to closure.",
+    "On-device drone/dashcam hazard detection and civic repair workflow for Electronic City, Bengaluru. Potholes, waterlogging and drain overflow - detected in your browser, tracked to closure.",
 };
 
 export default function RootLayout({

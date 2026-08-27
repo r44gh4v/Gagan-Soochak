@@ -4,10 +4,10 @@ import type { PreMeta } from "@/lib/model/types";
 /**
  * Replicates pipeline.py's exact two-step transform:
  *
- *   1. cv2.resize(frame, (640, 720))  — stretch, aspect DELIBERATELY distorted
+ *   1. cv2.resize(frame, (640, 720))  - stretch, aspect DELIBERATELY distorted
  *   2. Ultralytics letterbox 640×720 → 640×640 (aspect preserved, gray 114 pad)
  *
- * The intuitive single letterbox of the source frame is WRONG here — the
+ * The intuitive single letterbox of the source frame is WRONG here - the
  * model was always fed the stretched intermediate, so skipping step 1 would
  * produce genuinely different detections and silently break parity with the
  * Python pipeline. Both steps compose into one drawImage call below.

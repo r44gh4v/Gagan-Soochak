@@ -48,3 +48,4 @@ ml/parity_web.json
 
 # playwright artifacts
 .playwright-mcp/
+parity_footage.json

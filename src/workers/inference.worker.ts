@@ -6,7 +6,7 @@ import { decode } from "@/lib/model/postprocess";
 import { preprocess } from "@/lib/model/preprocess";
 import type { WorkerRequest, WorkerResponse } from "@/lib/model/types";
 
-// Next's bundler does not serve ORT's runtime from node_modules — the files
+// Next's bundler does not serve ORT's runtime from node_modules - the files
 // are copied to /public/ort by scripts/copy-ort.mjs.
 ort.env.wasm.wasmPaths = "/ort/";
 
@@ -36,7 +36,7 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
       const { bitmap } = msg;
       const t0 = performance.now();
       const { data, meta } = preprocess(bitmap);
-      bitmap.close(); // MUST close — leaked bitmaps kill the tab mid-demo
+      bitmap.close(); // MUST close - leaked bitmaps kill the tab mid-demo
 
       const input = new ort.Tensor("float32", data, [1, 3, INPUT_SIZE, INPUT_SIZE]);
       const out = await session.run({ images: input });

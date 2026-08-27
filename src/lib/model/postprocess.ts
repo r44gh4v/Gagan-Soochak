@@ -6,12 +6,12 @@ const NUM_ANCHORS = 8400;
 
 /**
  * Decode YOLOv8 raw output [1, 7, 8400] (channel-major: anchor i's cx is at
- * out[0*8400+i], scores at out[(4+c)*8400+i], already sigmoid'd — verified by
+ * out[0*8400+i], scores at out[(4+c)*8400+i], already sigmoid'd - verified by
  * ml/verify_onnx.py) into detections in source-frame pixels.
  *
  * Box mapping inverts the two-step preprocess:
  *   model 640×640 → un-letterbox → 640×720 space → scale by (srcW/640, srcH/720)
- * mirroring pipeline.py L279–L295. The aspect distortion of step 1 cancels
+ * mirroring pipeline.py L279-L295. The aspect distortion of step 1 cancels
  * out here, which is why logged coordinates stay correct.
  */
 export function decode(

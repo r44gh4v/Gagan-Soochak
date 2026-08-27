@@ -36,7 +36,7 @@ export function escalate(
           ...incident.owner,
           department: incident.owner.department.includes("(Escalated")
             ? incident.owner.department
-            : `${incident.owner.department} (Escalated — Ward Engineer)`,
+            : `${incident.owner.department} (Escalated - Ward Engineer)`,
         }
       : incident.owner,
     audit: [

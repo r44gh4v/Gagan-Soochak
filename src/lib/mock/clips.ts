@@ -1,6 +1,7 @@
 /**
- * Bundled sample clips. Files live in public/videos/ (kept ≤10 MB each,
- * H.264). Each clip is bound to a patrol route so simulated GPS stays
+ * Bundled sample clips - the team's own dashcam test footage (the same clips
+ * the Python edge pipeline was tested against, which keeps the parity story
+ * honest). Each clip is bound to a patrol route so simulated GPS stays
  * deterministic per clip.
  */
 export type SampleClip = {
@@ -11,13 +12,13 @@ export type SampleClip = {
 
 export const SAMPLE_CLIPS: SampleClip[] = [
   {
-    src: "/videos/sample-1.mp4",
-    label: "sample-1.mp4 — Hosur Road patrol",
+    src: "/videos/test_video.mp4",
+    label: "test_video.mp4 - Hosur Road patrol",
     routeId: "ec-hosur-road",
   },
   {
-    src: "/videos/sample-2.mp4",
-    label: "sample-2.mp4 — EC inner roads patrol",
+    src: "/videos/Test_Video2.mp4",
+    label: "Test_Video2.mp4 - EC inner roads patrol",
     routeId: "ec-inner-roads",
   },
 ];

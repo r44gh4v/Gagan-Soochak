@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ---------------------------------------------------------------------------
-   Gagan Soochak design tokens — light, clean municipal ops console.
+   Gagan Soochak design tokens - light, clean municipal ops console.
    Severity (red/amber/green) is the only saturated fill in the UI.
 --------------------------------------------------------------------------- */
 
@@ -37,7 +37,7 @@
   --chart-4: #059669;
   --chart-5: #7c3aed;
 
-  /* Severity — text / tinted bg / border / canvas stroke.
+  /* Severity - text / tinted bg / border / canvas stroke.
      Canvas overlay strokes use the SAME stroke hex as UI chips. */
   --severity-high: #b91c1c; /* red-700 */
   --severity-high-bg: #fef2f2; /* red-50 */
@@ -52,7 +52,7 @@
   --severity-low-border: #a7f3d0; /* emerald-200 */
   --severity-low-stroke: #059669; /* emerald-600 */
 
-  /* Status dots — deliberately quieter than severity */
+  /* Status dots - deliberately quieter than severity */
   --status-open: #71717a; /* zinc-500 */
   --status-assigned: #2563eb; /* blue-600 */
   --status-in-progress: #7c3aed; /* violet-600 */

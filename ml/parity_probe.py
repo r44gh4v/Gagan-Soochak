@@ -5,8 +5,8 @@ probe, same LCG) through best.onnx and dumps raw output stats + decoded boxes
 using the same math pipeline.py relies on. scripts/parity-probe.mjs does the
 identical thing via onnxruntime-web; compare the two JSON files.
 
-This isolates the real parity risks — tensor layout, channel order, decode
-strides, NMS — from image-resampling differences (cv2 vs canvas), which are
+This isolates the real parity risks - tensor layout, channel order, decode
+strides, NMS - from image-resampling differences (cv2 vs canvas), which are
 bounded separately by the on-footage check.
 
 Run:  uv run python parity_probe.py   ->  parity_python.json

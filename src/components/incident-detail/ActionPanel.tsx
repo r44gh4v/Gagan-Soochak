@@ -13,7 +13,7 @@ import type { Incident } from "@/lib/workflow/types";
 import { suggestedOwnerFor, useIncidentStore } from "@/store/incidents";
 
 /**
- * Only legal transitions render as buttons — illegal ones are absent, not
+ * Only legal transitions render as buttons - illegal ones are absent, not
  * greyed. Reversible actions apply immediately with a toast; irreversible
  * ones (reject, close) and escalation require a recorded reason/note.
  */
@@ -122,13 +122,13 @@ export function ActionPanel({ incident }: { incident: Incident }) {
                       applyTransition(
                         incident.id,
                         "in_progress",
-                        "verification failed — reopened",
+                        "verification failed - reopened",
                       ),
                     "Reopened for rework",
                   )
                 }
               >
-                Verification failed — reopen
+                Verification failed - reopen
               </Button>
             </>
           )}
@@ -155,7 +155,7 @@ export function ActionPanel({ incident }: { incident: Incident }) {
             Escalated{" "}
             {incident.escalatedAt &&
               `at ${new Date(incident.escalatedAt).toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" })} IST`}
-            {incident.escalationReason && ` — ${incident.escalationReason}`}
+            {incident.escalationReason && ` - ${incident.escalationReason}`}
           </p>
         )}
       </CardContent>
@@ -183,7 +183,7 @@ export function ActionPanel({ incident }: { incident: Incident }) {
         onConfirm={(note) =>
           act(
             () => applyTransition(incident.id, "resolved", note),
-            `${incident.id} resolved — awaiting verification`,
+            `${incident.id} resolved - awaiting verification`,
           )
         }
       />

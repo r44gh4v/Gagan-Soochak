@@ -1,7 +1,7 @@
 import type { Priority } from "@/lib/workflow/types";
 import { cn } from "@/lib/utils";
 
-/** Bold tabular text; P1 red. Redundant with severity by design — two cues scan faster. */
+/** Bold tabular text; P1 red. Redundant with severity by design - two cues scan faster. */
 export function PriorityLabel({
   priority,
   className,

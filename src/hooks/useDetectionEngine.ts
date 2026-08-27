@@ -50,9 +50,20 @@ export function useDetectionEngine(
         hazard.incidentId = id;
         useSessionStore.getState().recordIncident();
         const inc = useIncidentStore.getState().incidents[id];
-        toast(`${id} — ${CLASS_LABELS[hazard.className]}`, {
+        toast(`${id} - ${CLASS_LABELS[hazard.className]}`, {
           description: `${inc.severityLevel} · ${inc.location.landmark}`,
         });
+        // A hazard that is High on its very first frame lands in created AND
+        // highAlerts of the same tracker update; the highAlerts loop skipped
+        // it because incidentId was still null. Replay the one-time alert now
+        // (alerted=true with a just-set id can only mean it was swallowed).
+        if (hazard.alerted) {
+          useIncidentStore.getState().markHighAlert(id);
+          toast.error(`HIGH severity - ${CLASS_LABELS[hazard.className]}`, {
+            id: `high-${id}`,
+            description: `${id} · severity ${hazard.severity.score.toFixed(2)}`,
+          });
+        }
       } catch (err) {
         console.error("incident creation failed", err);
       }
@@ -63,6 +74,12 @@ export function useDetectionEngine(
   // Worker responses: tracker update + incident writes + evidence capture.
   const handleResult = useCallback(
     (msg: WorkerResponse) => {
+      if (msg.type === "error") {
+        // Without this, one failed inference leaves busyRef stuck true and
+        // detection silently halts for the rest of the session.
+        busyRef.current = false;
+        return;
+      }
       if (msg.type !== "result") return;
       busyRef.current = false;
       const video = videoRef.current;
@@ -124,7 +141,7 @@ export function useDetectionEngine(
       for (const hazard of update.highAlerts) {
         if (hazard.incidentId) {
           useIncidentStore.getState().markHighAlert(hazard.incidentId);
-          toast.error(`HIGH severity — ${CLASS_LABELS[hazard.className]}`, {
+          toast.error(`HIGH severity - ${CLASS_LABELS[hazard.className]}`, {
             id: `high-${hazard.incidentId}`,
             description: `${hazard.incidentId} · severity ${hazard.severity.score.toFixed(2)}`,
           });
@@ -139,7 +156,7 @@ export function useDetectionEngine(
     [initWorker, handleResult],
   );
 
-  // Frame loop — requestVideoFrameCallback ties us to decoded frames.
+  // Frame loop - requestVideoFrameCallback ties us to decoded frames.
   const loop = useCallback(() => {
     const video = videoRef.current;
     if (!video || !runningRef.current) return;
@@ -151,6 +168,7 @@ export function useDetectionEngine(
 
       frameIdxRef.current++;
       const shouldProcess =
+        s.model.phase === "ready" && // never post infer before init completes
         frameIdxRef.current % s.skipN === 0 &&
         !busyRef.current &&
         !v.paused &&

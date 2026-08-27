@@ -96,7 +96,7 @@ export function AppHeader() {
                     const seeded = await buildSeedIncidents(defaultPatrolStart());
                     useIncidentStore.getState().loadIncidents(seeded);
                     toast(`Loaded ${seeded.length} seeded demo incidents`, {
-                      description: "Badged as SEED DATA — separate from real detections",
+                      description: "Badged as SEED DATA - separate from real detections",
                     });
                   })();
                 }}

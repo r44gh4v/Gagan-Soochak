@@ -23,6 +23,6 @@ path = model.export(
     simplify=True,
     dynamic=False,
     nms=False,
-    half=False,  # fp32 — ORT-web fp16 support is uneven
+    half=False,  # fp32 - ORT-web fp16 support is uneven
 )
 print(f"exported: {path}")

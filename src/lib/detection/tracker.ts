@@ -105,8 +105,10 @@ export class HazardTracker {
           severity: { score: 0, level: "Low", spatial: 0, temporal: 0 },
           firstSeenVideoTime: videoTime,
         };
+        // NOT added to `matched` - pipeline.py only marks matched indices, so
+        // a hazard created earlier in this same update() call stays claimable
+        // by later detections in the same frame (they merge, not duplicate).
         this.active.push(hazard);
-        matched.add(this.active.length - 1);
       }
 
       hazard.severity = computeSeverity(det.bbox, frameW, frameH, hazard.consecutiveCount);

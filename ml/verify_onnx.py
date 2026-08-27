@@ -34,11 +34,11 @@ print(f"run   : zeros -> {y.shape}, scores finite: {bool(np.isfinite(y).all())}"
 if list(y.shape) != EXPECT_OUTPUT or not np.isfinite(y).all():
     ok = False
 
-# Class scores must already be sigmoid'd (0-1) — web postprocess must NOT re-activate
+# Class scores must already be sigmoid'd (0-1) - web postprocess must NOT re-activate
 smin, smax = float(y[0, 4:7].min()), float(y[0, 4:7].max())
 print(f"score range on zeros input: [{smin:.4f}, {smax:.4f}]")
 if smin < 0.0 or smax > 1.0:
-    print("FAIL: class scores outside [0,1] — are they raw logits?")
+    print("FAIL: class scores outside [0,1] - are they raw logits?")
     ok = False
 
 print("OK" if ok else "CONTRACT VIOLATED")

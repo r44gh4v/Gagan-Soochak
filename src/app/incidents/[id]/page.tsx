@@ -29,7 +29,7 @@ export default function IncidentDetailPage() {
       <EmptyState
         icon={FileQuestion}
         title="Incident not found"
-        description={`No incident ${id} in this browser's store. Incident data is client-side — it lives where the detection ran.`}
+        description={`No incident ${id} in this browser's store. Incident data is client-side - it lives where the detection ran.`}
         actionLabel="Back to queue"
         actionHref="/incidents"
       />
@@ -66,7 +66,7 @@ export default function IncidentDetailPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[5fr_4fr_3fr]">
-        {/* Evidence — what happened */}
+        {/* Evidence - what happened */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Evidence</CardTitle>
@@ -115,7 +115,7 @@ export default function IncidentDetailPage() {
                     {incident.location.landmark} · {incident.location.zone} ·{" "}
                     {incident.location.ward} ward
                   </span>
-                  <SimulatedBadge tooltip="GPS interpolated along a simulated patrol route through Electronic City — deterministic per video position." />
+                  <SimulatedBadge tooltip="GPS interpolated along a simulated patrol route through Electronic City - deterministic per video position." />
                 </div>
                 <div className="mt-0.5 font-mono text-xs text-muted-foreground">
                   {incident.location.lat.toFixed(6)}, {incident.location.lng.toFixed(6)}
@@ -145,7 +145,7 @@ export default function IncidentDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Action — what to do */}
+        {/* Action - what to do */}
         <div className="space-y-4">
           <Card>
             <CardHeader className="pb-2">
@@ -170,7 +170,7 @@ export default function IncidentDetailPage() {
           <ActionPanel incident={incident} />
         </div>
 
-        {/* Audit — what was done */}
+        {/* Audit - what was done */}
         <Card className="self-start">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Audit trail</CardTitle>
@@ -186,7 +186,7 @@ export default function IncidentDetailPage() {
         <Link href={`/incidents/${incident.id}`} className="underline">
           /incidents/{incident.id}
         </Link>{" "}
-        — note incident data is stored in the browser that ran the detection.
+        - note incident data is stored in the browser that ran the detection.
       </p>
     </div>
   );

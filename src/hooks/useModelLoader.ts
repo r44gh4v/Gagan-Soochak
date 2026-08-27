@@ -25,12 +25,21 @@ export function useModelLoader() {
         );
         workerRef.current = worker;
         let fromCache = false;
+        let ready = false;
 
         worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
           const msg = e.data;
           if (msg.type === "ready") {
+            ready = true;
             setModel({ phase: "ready", backend: msg.backend, fromCache });
           } else if (msg.type === "error") {
+            if (!ready) {
+              // Init-time failure: release the worker so the ModelGate Retry
+              // button can re-run init instead of hitting the ref guard above.
+              // Transient inference errors after ready keep the live session.
+              worker.terminate();
+              workerRef.current = null;
+            }
             setModel({ phase: "error", message: msg.message });
           }
           onMessage?.(msg);
@@ -47,6 +56,9 @@ export function useModelLoader() {
         if (fromCache) setModel({ phase: "compiling" });
         worker.postMessage({ type: "init", buffer: result.buffer }, [result.buffer]);
       } catch (err) {
+        // Model fetch failed: release the worker so Retry re-runs a full init.
+        workerRef.current?.terminate();
+        workerRef.current = null;
         setModel({
           phase: "error",
           message: err instanceof Error ? err.message : String(err),

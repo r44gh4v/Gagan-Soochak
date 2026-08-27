@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CLASS_LABELS, type HazardClass, type SeverityLevel } from "@/lib/detection/constants";
 import type { LiveDetection } from "@/hooks/useDetectionEngine";
 
-/** Raw model output feed — shows the model working even when nothing new becomes an incident. */
+/** Raw model output feed - shows the model working even when nothing new becomes an incident. */
 export function DetectionTicker({ items }: { items: LiveDetection[] }) {
   if (!items.length) {
     return (

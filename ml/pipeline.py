@@ -1,10 +1,10 @@
 """
-DuoQueue — Detection + Severity Scoring + Event Logging Pipeline
+DuoQueue - Detection + Severity Scoring + Event Logging Pipeline
 
 Video source -> YOLOv8n inference -> track hazards across frames ->
 severity score -> log to SQLite -> save alert thumbnails.
 
-This is the piece that turns "a trained model" into "a working system" —
+This is the piece that turns "a trained model" into "a working system" -
 run it against a video file now; later, swap VIDEO_SOURCE for an RTSP
 URL or webcam index and nothing else about the pipeline changes.
 
@@ -21,7 +21,7 @@ import cv2
 from ultralytics import YOLO
 
 # ---------------------------------------------------------------------------
-# Config — edit these for your setup
+# Config - edit these for your setup
 # ---------------------------------------------------------------------------
 
 MODEL_PATH = "best.pt"
@@ -32,7 +32,7 @@ MODEL_PATH = "best.pt"
 #   "rtsp://192.168.1.50:554/live"      <- a live CCTV/IP-cam stream
 VIDEO_SOURCE = "test_video.mp4"
 
-# Zone tag for this camera — proposal's "camera-to-location mapping",
+# Zone tag for this camera - proposal's "camera-to-location mapping",
 # manual static lookup for now. Change per camera if you run more than one.
 ZONE_NAME = "Electronics City - Hosur Road"
 
@@ -41,9 +41,9 @@ ZONE_NAME = "Electronics City - Hosur Road"
 # dated from the yolov8s run. See severity-persistence note below for why
 # skipping doesn't hurt detection quality for this use case.
 PROCESS_EVERY_N = 2
-RESIZE_DIM = (640, 720)  # (width, height) — matches proposal's drone-feed spec
+RESIZE_DIM = (640, 720)  # (width, height) - matches proposal's drone-feed spec
 
-# Only trust detections above this confidence — filters model noise
+# Only trust detections above this confidence - filters model noise
 CONF_THRESHOLD = 0.3
 
 # How many *processed* frames a hazard must persist across to count as
@@ -55,7 +55,7 @@ DETECTION_WINDOW = 10
 # are treated as "the same physical hazard" if their centers are within
 # this fraction of the frame's diagonal of each other. Distance-based
 # rather than box-overlap-based, since box overlap breaks down fast on a
-# moving camera (drone or dashcam) — the same physical pothole shifts
+# moving camera (drone or dashcam) - the same physical pothole shifts
 # position between processed frames even though it hasn't moved at all.
 MATCH_DISTANCE_THRESHOLD = 0.15
 
@@ -71,7 +71,7 @@ SEVERITY_LEVELS = [
 ]
 
 # If True, play back at roughly the source video's real frame rate instead
-# of as fast as the CPU can go — makes a demo video feel "live" on screen.
+# of as fast as the CPU can go - makes a demo video feel "live" on screen.
 # Irrelevant for a genuinely live camera/RTSP source (already real-time).
 PACE_TO_REALTIME = True
 
@@ -106,7 +106,7 @@ def init_db(db_path: str) -> sqlite3.Connection:
 
 def insert_incident(conn, zone, hazard_class, severity_score, severity_level,
                      confidence, bbox, thumbnail_path=None):
-    """Called once, the first time a hazard is tracked — logs it immediately
+    """Called once, the first time a hazard is tracked - logs it immediately
     at whatever severity it starts at (Low/Medium/High), not just High ones.
     Returns the new row's id so later frames can update it in place."""
     cur = conn.execute(
@@ -126,7 +126,7 @@ def insert_incident(conn, zone, hazard_class, severity_score, severity_level,
 
 def update_incident(conn, row_id, severity_score, severity_level,
                      confidence, bbox, thumbnail_path=None):
-    """Called on later frames as the same tracked hazard persists — keeps
+    """Called on later frames as the same tracked hazard persists - keeps
     its existing row current instead of inserting a duplicate every frame."""
     if thumbnail_path is not None:
         conn.execute(
@@ -186,14 +186,14 @@ def compute_severity(bbox, frame_shape, consecutive_count: int) -> float:
 # ---------------------------------------------------------------------------
 # Simple frame-to-frame hazard tracker
 #
-# Not a real multi-object tracker (no Kalman filter, no re-ID) — nearest-
+# Not a real multi-object tracker (no Kalman filter, no re-ID) - nearest-
 # centroid matching against the previous processed frame's boxes. IoU
 # matching was tried first and failed on moving-camera footage (the same
 # hazard's box shifts between frames even though it hasn't moved).
 # ---------------------------------------------------------------------------
 
 class HazardTracker:
-    """Not a real multi-object tracker (no Kalman filter, no re-ID) — just
+    """Not a real multi-object tracker (no Kalman filter, no re-ID) - just
     nearest-centroid matching against the previous processed frame's boxes,
     tolerant of camera motion. Good enough for this use case; would need
     upgrading (optical flow / a real tracker) for very fast, erratic motion."""
@@ -204,7 +204,7 @@ class HazardTracker:
     def update(self, detections, processed_idx, frame_shape):
         """detections: list of (class_name, bbox, confidence). Returns list of
         (class_name, bbox, confidence, consecutive_count, hazard_dict, is_new)
-        for this frame — is_new tells the caller whether to INSERT or UPDATE
+        for this frame - is_new tells the caller whether to INSERT or UPDATE
         this hazard's database row."""
         matched_active_ids = set()
         results = []
@@ -307,7 +307,7 @@ def main():
 
                 if is_new:
                     # Log every hazard the moment it's first seen, at
-                    # whatever severity it starts at — not just High ones.
+                    # whatever severity it starts at - not just High ones.
                     # This is what feeds the dashboard's full incident log.
                     hazard["db_id"] = insert_incident(
                         conn, ZONE_NAME, cls_name, score, level, conf, bbox)
@@ -315,7 +315,7 @@ def main():
                     print(f"[LOG] {cls_name} | severity={score:.2f} ({level})")
                 elif level != hazard["last_logged_level"]:
                     # Same hazard, but its severity level changed since we
-                    # last logged it (e.g. Low -> Medium as it persists) —
+                    # last logged it (e.g. Low -> Medium as it persists) -
                     # keep its row current instead of leaving it stale.
                     update_incident(conn, hazard["db_id"], score, level, conf, bbox)
                     hazard["last_logged_level"] = level
@@ -338,7 +338,7 @@ def main():
             # Draw every currently-active hazard's last-known box on EVERY
             # frame, not just the frame it was actually detected on.
             # Otherwise, with PROCESS_EVERY_N > 1, boxes only appear on 1
-            # out of every N frames and vanish immediately after — at video
+            # out of every N frames and vanish immediately after - at video
             # speed that's invisible, even though detection is working fine.
             for hazard in tracker.active:
                 x1, y1, x2, y2 = hazard["bbox"]

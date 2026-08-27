@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * Honesty marker for mocked/derived fields. Present but not shouting —
+ * Honesty marker for mocked/derived fields. Present but not shouting -
  * the submission declaration requires simulated data to be clearly separated.
  */
 export function SimulatedBadge({
