@@ -117,7 +117,7 @@ uv run python export_onnx.py    # best.pt -> best.onnx
 uv run python verify_onnx.py    # asserts the I/O contract the web build depends on
 ```
 
-Pinned versions: `ml/requirements.lock.txt`. The original edge pipeline runs with
+Pinned versions: `ml/uv.lock`. The original edge pipeline runs with
 `uv run python pipeline.py` (set `VIDEO_SOURCE` in the file).
 
 ## Evidence fields per incident
