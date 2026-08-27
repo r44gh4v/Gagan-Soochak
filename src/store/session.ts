@@ -21,6 +21,8 @@ type PerfStats = {
   framesProcessed: number;
   detections: number;
   incidentsCreated: number;
+  /** Repeat sightings folded into an existing incident. */
+  mergedSightings: number;
   highAlerts: number;
   inferenceMsTotal: number;
   inferenceMsLast: number;
@@ -48,6 +50,7 @@ type SessionState = {
   recordFrame: (processed: boolean) => void;
   recordInference: (ms: number, detections: number) => void;
   recordIncident: () => void;
+  recordMergedSighting: () => void;
   recordHighAlert: () => void;
   resetPerf: () => void;
 };
@@ -57,6 +60,7 @@ const emptyPerf = (): PerfStats => ({
   framesProcessed: 0,
   detections: 0,
   incidentsCreated: 0,
+  mergedSightings: 0,
   highAlerts: 0,
   inferenceMsTotal: 0,
   inferenceMsLast: 0,
@@ -109,6 +113,11 @@ export const useSessionStore = create<SessionState>()((set) => ({
   recordIncident: () =>
     set((s) => ({
       perf: { ...s.perf, incidentsCreated: s.perf.incidentsCreated + 1 },
+    })),
+
+  recordMergedSighting: () =>
+    set((s) => ({
+      perf: { ...s.perf, mergedSightings: s.perf.mergedSightings + 1 },
     })),
 
   recordHighAlert: () =>

@@ -253,6 +253,7 @@ export default function AnalyticsPage() {
                   ["Frames processed", `${perf.framesProcessed} (every ${skipN})`],
                   ["Raw detections", String(perf.detections)],
                   ["Incidents created", String(perf.incidentsCreated)],
+                  ["Repeat sightings merged", String(perf.mergedSightings)],
                   ["Model file", "best.onnx · 11.7 MB"],
                   ["Input", "640×640 letterboxed"],
                 ] as [string, string][]

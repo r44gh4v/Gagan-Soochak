@@ -122,6 +122,50 @@ export default function AboutPage() {
       </section>
 
       <section>
+        <h2 className="text-base font-semibold">
+          One defect, one work item (repeat-sighting clustering)
+        </h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          The tracker drops a hazard once it leaves frame, so a single pothole a
+          vehicle approaches, passes and glances back at produces several
+          independent tracks. Logging each as its own ticket is correct as a{" "}
+          <em>detection</em> record and wrong as a <em>civic</em> one - it hands
+          a ward engineer twenty tickets for one pothole.
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          So the dashboard clusters at the incident layer: same hazard class,
+          within 25 m, within 30 minutes, still open for action → the same
+          physical defect. The incident keeps a <strong>sightings</strong> count,
+          every merge is written to the audit trail, and if a later sighting
+          scores higher the record is upgraded to that severity and evidence.
+          Closed and rejected incidents are never merged into - a new sighting of
+          either is genuinely new information. On one 8.9 s clip this turned 58
+          raw detections into 4 work items.
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          <strong>Detection, tracking and severity maths are untouched</strong> -
+          this is bookkeeping on top of them, which is why the parity evidence
+          against the Python pipeline still holds.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-base font-semibold">Privacy &amp; data handling</h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Footage never leaves the browser. A clip you upload becomes an
+          in-memory <code className="font-mono text-xs">blob:</code> URL and is
+          read frame-by-frame on your own device; there is no upload endpoint,
+          and the app makes no cross-origin requests at all. Incidents and
+          evidence images are stored locally (localStorage + IndexedDB) and are
+          deleted by <em>Delete all</em> in the Queue.
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The model is fetched once (~12 MB) and kept in the Cache Storage API,
+          so later visits and reloads use the cached copy and work offline.
+        </p>
+      </section>
+
+      <section>
         <h2 className="text-base font-semibold">Preprocessing parity</h2>
         <p className="mt-3 text-sm text-muted-foreground">
           The Python pipeline stretches frames to 640×720 (aspect distorted), then
@@ -173,8 +217,8 @@ export default function AboutPage() {
             improvement.
           </li>
           <li>
-            Centroid tracking confuses adjacent same-class hazards; repeat passes
-            over the same street create separate incidents (no de-duplication).
+            Centroid tracking has no Kalman filter or re-identification, so two
+            very close same-class defects can be confused for one.
           </li>
           <li>Single video stream; no live RTSP/drone ingest in this build.</li>
           <li>

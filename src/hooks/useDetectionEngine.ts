@@ -47,11 +47,12 @@ export function useDetectionEngine(
     async (hazard: TrackedHazard, ctx: DetectionContext, video: HTMLVideoElement) => {
       try {
         const evidence = await captureEvidence(video, hazard);
-        const id = await useIncidentStore
+        const { id, merged } = await useIncidentStore
           .getState()
           .createFromHazard(hazard, ctx, evidence);
         hazard.incidentId = id;
-        useSessionStore.getState().recordIncident();
+        if (merged) useSessionStore.getState().recordMergedSighting();
+        else useSessionStore.getState().recordIncident();
         // Detections are surfaced in the Monitor's live rail and the Queue,
         // not as toasts - a busy clip would otherwise bury the screen in them.
         // A hazard that is High on its very first frame lands in created AND

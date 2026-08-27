@@ -18,22 +18,39 @@ export async function captureEvidence(
   const vh = video.videoHeight;
   const [x1, y1, x2, y2] = hazard.bbox;
 
-  // --- thumbnail: padded crop ---
-  const padW = (x2 - x1) * 0.15;
-  const padH = (y2 - y1) * 0.15;
-  const cx1 = Math.max(0, x1 - padW);
-  const cy1 = Math.max(0, y1 - padH);
-  const cw = Math.min(vw, x2 + padW) - cx1;
-  const ch = Math.min(vh, y2 + padH) - cy1;
+  // --- thumbnail: crop with real surroundings ---
+  // A distant pothole is only ~40 px wide; a tight crop of it is an
+  // unreadable dark blob in the queue. Expand around the box to a minimum
+  // context window so the operator can see the road it sits on.
+  const MIN_CONTEXT = 220;
+  const boxW = x2 - x1;
+  const boxH = y2 - y1;
+  const targetW = Math.max(boxW * 2.2, MIN_CONTEXT);
+  const targetH = Math.max(boxH * 2.2, MIN_CONTEXT * 0.75);
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2;
+  const cw = Math.min(vw, targetW);
+  const ch = Math.min(vh, targetH);
+  const cx1 = Math.min(Math.max(0, midX - cw / 2), vw - cw);
+  const cy1 = Math.min(Math.max(0, midY - ch / 2), vh - ch);
   const tScale = Math.min(1, 320 / cw);
 
   const thumbCanvas = new OffscreenCanvas(
     Math.max(1, Math.round(cw * tScale)),
     Math.max(1, Math.round(ch * tScale)),
   );
-  thumbCanvas
-    .getContext("2d")!
-    .drawImage(video, cx1, cy1, cw, ch, 0, 0, thumbCanvas.width, thumbCanvas.height);
+  const tc = thumbCanvas.getContext("2d")!;
+  tc.drawImage(video, cx1, cy1, cw, ch, 0, 0, thumbCanvas.width, thumbCanvas.height);
+  // Mark the defect inside the wider crop, or the operator can't tell what
+  // they're looking at.
+  tc.strokeStyle = SEVERITY_STROKE[hazard.severity.level];
+  tc.lineWidth = 2;
+  tc.strokeRect(
+    (x1 - cx1) * tScale,
+    (y1 - cy1) * tScale,
+    boxW * tScale,
+    boxH * tScale,
+  );
 
   // --- annotated full frame ---
   const fScale = Math.min(1, 640 / vw);

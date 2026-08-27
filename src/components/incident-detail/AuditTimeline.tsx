@@ -2,6 +2,7 @@ import type { AuditEntry } from "@/lib/workflow/types";
 
 const ACTION_LABELS: Record<AuditEntry["action"], string> = {
   DETECTED: "Detected",
+  REPEAT_SIGHTING: "Repeat sighting",
   SEVERITY_CHANGED: "Severity changed",
   HIGH_ALERT: "High-severity alert",
   ASSIGNED: "Assigned",

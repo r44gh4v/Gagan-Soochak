@@ -82,7 +82,7 @@ export async function buildSeedIncidents(patrolStartIso: string): Promise<Incide
     const score = 0.6 * s.spatial + 0.4 * s.temporal;
     const level = severityLevelFor(score);
     const priority = priorityFor(s.cls, level);
-    const location = locationAt("ec-hosur-road", s.videoTime, 60);
+    const location = locationAt("ec-hosur-road", s.videoTime);
     const detectedAt = new Date(base + s.videoTime * 1000).toISOString();
     // Rejected seeds went straight open -> rejected (their audit trail has no
     // ASSIGNED entry), so an owner would contradict the history the UI shows.

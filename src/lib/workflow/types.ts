@@ -13,6 +13,7 @@ export type IncidentStatus =
 
 export type AuditAction =
   | "DETECTED"
+  | "REPEAT_SIGHTING"
   | "SEVERITY_CHANGED"
   | "HIGH_ALERT"
   | "ASSIGNED"

@@ -20,7 +20,12 @@ audit trail, escalation, false-positive rejection, and JSON/CSV export.
 
 - **Genuinely on-device.** Open DevTools → Network: after the one-time model download,
   nothing leaves the browser. Go offline - detection still works. Judges can drop in their
-  own mp4 and watch it detect on footage we never picked.
+  own mp4 and watch it detect on footage we never picked. Verified: an uploaded clip is a
+  `blob:` URL with **zero** network requests, zero fetch/XHR, zero cross-origin traffic;
+  the model is served from Cache Storage with 0 requests on repeat visits.
+- **One defect, one work item.** Repeat sightings of the same physical hazard are clustered
+  into a single incident with a sightings count and an audit entry - 58 raw detections
+  became 4 tickets on one clip, instead of 20 near-duplicates.
 - **Same math as the edge pipeline.** The tracker constants, severity formula and
   preprocessing are ported verbatim from `ml/pipeline.py`; `evidence/parity_check.md` shows
   numerically identical model output across both runtimes.
@@ -134,8 +139,9 @@ not timers). Every simulated field is badged in the UI and exported as
   It leads our future-scope list.
 - `drain_overflow` is the weak class (~80 training images); expect false positives - that is
   what the Reject action is for.
-- Centroid tracking (no Kalman/re-ID) can confuse adjacent same-class hazards; repeat passes
-  create separate incidents.
+- Centroid tracking (no Kalman/re-ID) can confuse two very close same-class defects.
+- Repeat-sighting clustering keys on simulated GPS; with real telemetry the radius would
+  need tuning against actual position error.
 - Single stream; no live RTSP/drone ingest in this build.
 - Incident data is per-browser (localStorage + IndexedDB) by design for this evaluation; a
   server DB is a contained swap at the store boundary.

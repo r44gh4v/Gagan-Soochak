@@ -70,6 +70,7 @@ three classes on the team's own footage.
 |---|---|
 | NMS in TypeScript (IoU 0.45) vs. Ultralytics-internal | ONNX exported with `nms=False`; enables the live confidence slider |
 | Evidence images per incident vs. thumbnail-on-High-only | dashboard queue needs triageable thumbnails |
+| Repeat-sighting clustering at the incident layer | `pipeline.py` logs one row per track, correct for a detection log; a civic queue needs one work item per physical defect. Detection/tracking/severity maths are **unchanged** - clustering happens after them, so the parity results above still hold. |
 | `PROCESS_EVERY_N` default 2 | Build Notes §4 current config (source's old 4 was yolov8s-era) |
 
 ## 4. Throughput comparison

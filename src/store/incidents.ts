@@ -15,6 +15,7 @@ import {
   thumbKey,
 } from "@/lib/storage/evidenceStore";
 import { canTransition, transition } from "@/lib/workflow/lifecycle";
+import { findDuplicate } from "@/lib/workflow/dedupe";
 import { escalate, priorityFor, SLA_HOURS } from "@/lib/workflow/priority";
 import { recommendAction } from "@/lib/workflow/playbook";
 import { suggestOwner } from "@/lib/workflow/routing";
@@ -40,7 +41,7 @@ type IncidentState = {
     hazard: TrackedHazard,
     ctx: DetectionContext,
     evidence: { thumbnail: Blob; frame: Blob },
-  ) => Promise<string>;
+  ) => Promise<{ id: string; merged: boolean }>;
   updateSeverity: (
     id: string,
     score: number,
@@ -66,6 +67,75 @@ export const useIncidentStore = create<IncidentState>()(
       seq: 0,
 
       createFromHazard: async (hazard, ctx, evidence) => {
+        const location = locationAt(ctx.routeId, ctx.videoTimeSec);
+        const detectedAt = timestampAt(ctx.patrolStartIso, ctx.videoTimeSec);
+        const level = hazard.severity.level;
+        const priority = priorityFor(hazard.className, level);
+
+        // Same physical defect seen again (tracker dropped it, then
+        // re-acquired)? Fold it into the existing work item rather than
+        // opening a second ticket for one pothole.
+        const existing = findDuplicate(
+          get().order.map((oid) => get().incidents[oid]).filter(Boolean),
+          hazard.className,
+          location,
+          detectedAt,
+        );
+
+        if (existing) {
+          const worse = hazard.severity.score > existing.severityScore;
+          if (worse) {
+            // Keep the most severe view of the defect as its evidence.
+            await putEvidence(thumbKey(existing.id), evidence.thumbnail);
+            await putEvidence(frameKey(existing.id), evidence.frame);
+          }
+          set((s) => {
+            const inc = s.incidents[existing.id];
+            if (!inc) return s;
+            const nextPriority = worse
+              ? priorityFor(inc.hazardClass, level)
+              : inc.priority;
+            return {
+              incidents: {
+                ...s.incidents,
+                [existing.id]: {
+                  ...inc,
+                  sightings: inc.sightings + 1,
+                  ...(worse
+                    ? {
+                        severityScore: hazard.severity.score,
+                        severityLevel: level,
+                        severityBreakdown: {
+                          spatial: hazard.severity.spatial,
+                          temporal: hazard.severity.temporal,
+                        },
+                        confidence: hazard.confidence,
+                        priority: nextPriority,
+                        slaTargetHours: SLA_HOURS[nextPriority],
+                        recommendedAction: recommendAction(inc.hazardClass, level),
+                        evidence: {
+                          ...inc.evidence,
+                          bbox: hazard.bbox,
+                          videoTimeSec: ctx.videoTimeSec,
+                        },
+                      }
+                    : {}),
+                  audit: [
+                    ...inc.audit,
+                    {
+                      at: new Date().toISOString(),
+                      actor: "System" as const,
+                      action: "REPEAT_SIGHTING" as const,
+                      detail: `re-detected at ${location.landmark} · severity ${hazard.severity.score.toFixed(2)} (${level})${worse ? " — record upgraded" : ""}`,
+                    },
+                  ],
+                },
+              },
+            };
+          });
+          return { id: existing.id, merged: true };
+        }
+
         // Reserve the sequence number synchronously BEFORE any await — two
         // hazards on the same processed frame create concurrently, and both
         // reading seq across the IndexedDB awaits would mint the same id.
@@ -77,11 +147,6 @@ export const useIncidentStore = create<IncidentState>()(
         // at a missing image.
         await putEvidence(thumbKey(id), evidence.thumbnail);
         await putEvidence(frameKey(id), evidence.frame);
-
-        const location = locationAt(ctx.routeId, ctx.videoTimeSec, ctx.videoDurationSec);
-        const detectedAt = timestampAt(ctx.patrolStartIso, ctx.videoTimeSec);
-        const level = hazard.severity.level;
-        const priority = priorityFor(hazard.className, level);
 
         const incident: Incident = {
           id,
@@ -133,7 +198,7 @@ export const useIncidentStore = create<IncidentState>()(
           incidents: { ...s.incidents, [id]: incident },
           order: [id, ...s.order],
         }));
-        return id;
+        return { id, merged: false };
       },
 
       updateSeverity: (id, score, level, breakdown, sightings) =>

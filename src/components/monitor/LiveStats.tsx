@@ -18,6 +18,7 @@ export function LiveStats() {
     ["Frames processed", String(perf.framesProcessed)],
     ["Detections", String(perf.detections)],
     ["Incidents", String(perf.incidentsCreated)],
+    ["Repeat sightings", String(perf.mergedSightings)],
     ["High alerts", String(perf.highAlerts)],
   ];
 

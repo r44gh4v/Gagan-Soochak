@@ -102,6 +102,9 @@ export function IncidentTable({
                 <div className="font-mono text-xs">{inc.id}</div>
                 <div className="text-xs text-muted-foreground">
                   {CLASS_LABELS[inc.hazardClass]}
+                  {inc.sightings > 1 && (
+                    <span className="ml-1 tabular-nums">·{inc.sightings}× seen</span>
+                  )}
                   {inc.escalated && (
                     <span className="ml-1 text-[#b45309]">· escalated</span>
                   )}

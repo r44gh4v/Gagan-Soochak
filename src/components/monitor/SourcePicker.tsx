@@ -109,7 +109,7 @@ export function SourcePicker({
             const d = new Date(e.target.value);
             if (!Number.isNaN(d.getTime())) setPatrolStartIso(d.toISOString());
           }}
-          className="h-8 w-48 text-xs"
+          className="h-8 w-[15rem] text-xs"
         />
       </div>
     </div>
