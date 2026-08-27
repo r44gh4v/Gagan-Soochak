@@ -2,7 +2,7 @@
 
 **On-device monsoon-hazard detection and civic repair workflow for Electronic City, Bengaluru.**
 
-Team DuoQueue · ELCIA Smart City Drone-AI Challenge 2026 · Track 2: Monsoon, Roads & Civic Infrastructure
+Team Long Shot · ELCIA Smart City Drone-AI Challenge 2026 · Track 2: Monsoon, Roads & Civic Infrastructure
 
 A human operator opens a URL, loads drone/dashcam footage, and watches potholes,
 waterlogged roads and drain overflows get detected **in their own browser** - the YOLOv8n
@@ -12,7 +12,7 @@ timestamp, visual proof), is auto-routed to the responsible department (BBMP Roa
 SWD / BWSSB), and is tracked through a municipal lifecycle to verified closure - with an
 audit trail, escalation, false-positive rejection, and JSON/CSV export.
 
-> **Live demo:** _(Vercel URL here)_ · **5-min video:** _(link here)_
+> **Live demo:** https://gagan-soochak.vercel.app
 
 ![Queue](evidence/screenshots/queue.png)
 
@@ -174,4 +174,4 @@ Full methodology + limitations: the in-app **/about** page and `ml/Technical_Bui
 
 ## Team
 
-DuoQueue - _(names + who built what: ML pipeline / dashboard - fill for submission)_
+Long Shot
