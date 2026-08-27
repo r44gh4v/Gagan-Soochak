@@ -21,6 +21,7 @@ type PerfStats = {
   framesProcessed: number;
   detections: number;
   incidentsCreated: number;
+  highAlerts: number;
   inferenceMsTotal: number;
   inferenceMsLast: number;
   inferenceSamples: number[]; // ring for p95
@@ -47,6 +48,7 @@ type SessionState = {
   recordFrame: (processed: boolean) => void;
   recordInference: (ms: number, detections: number) => void;
   recordIncident: () => void;
+  recordHighAlert: () => void;
   resetPerf: () => void;
 };
 
@@ -55,6 +57,7 @@ const emptyPerf = (): PerfStats => ({
   framesProcessed: 0,
   detections: 0,
   incidentsCreated: 0,
+  highAlerts: 0,
   inferenceMsTotal: 0,
   inferenceMsLast: 0,
   inferenceSamples: [],
@@ -107,6 +110,9 @@ export const useSessionStore = create<SessionState>()((set) => ({
     set((s) => ({
       perf: { ...s.perf, incidentsCreated: s.perf.incidentsCreated + 1 },
     })),
+
+  recordHighAlert: () =>
+    set((s) => ({ perf: { ...s.perf, highAlerts: s.perf.highAlerts + 1 } })),
 
   resetPerf: () => set({ perf: emptyPerf() }),
 }));

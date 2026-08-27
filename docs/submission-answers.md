@@ -44,8 +44,10 @@ SEED DATA. All detections, severity scores, confidences and latencies are measur
 fabricated.
 
 **Future scope (≤100 words):**
-damaged_footpath - the fourth track class - is not implemented (not sourced or annotated);
-our merge pipeline already supports adding it via a new source + class map + retrain. Then:
+damaged_footpath - the fourth track class - was prepared but is not in the shipped model:
+adding a fourth class to a single all-in-one detector pushed it past our CPU real-time
+budget, so we shipped three classes that run in real time on-device instead. The merge
+pipeline supports adding it via a new source + class map + retrain. Then:
 live drone/RTSP ingest; OpenVINO/INT8 CPU export and Jetson+TensorRT edge deployment;
 ByteTrack-style re-ID tracking; real GPS/telemetry binding; multi-operator server database;
 automated SLA timers and auto-escalation; municipal ticketing integration; a retraining loop
@@ -101,7 +103,10 @@ evidence/cases.md.)_
 - *"Why is drain_overflow's number trustworthy?"* - It isn't, fully: 0.720 over ~16 val
   instances. That's why we quote the sample size, why the threshold is permissive, and why
   Reject is a first-class operator action.
-- *"Only 3 classes?"* - Yes; damaged_footpath leads future scope. The merge pipeline is
+- *"Only 3 classes?"* - damaged_footpath was prepared, but as a fourth class in one
+  all-in-one detector it broke the CPU real-time budget we committed to; we chose three
+  classes running in real time on-device over four that don't. We claim no accuracy figure
+  for it because none was measured on a shipped model. The merge pipeline is
   built for adding it.
 - *"What happens with five operators?"* - Client-side persistence is a deliberate choice for
   this evaluation; `Incident` is a plain serialisable object and the store boundary is the

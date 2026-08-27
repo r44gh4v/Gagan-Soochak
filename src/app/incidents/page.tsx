@@ -1,10 +1,11 @@
 "use client";
 
-import { Inbox, LayoutGrid, List } from "lucide-react";
+import { Inbox, LayoutGrid, List, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { ConfirmDelete } from "@/components/common/ConfirmDelete";
 import { EmptyState } from "@/components/common/EmptyState";
 import {
   DEFAULT_FILTERS,
@@ -41,6 +42,8 @@ function QueueContent() {
   const order = useIncidentStore((s) => s.order);
   const assignOwner = useIncidentStore((s) => s.assignOwner);
   const bulkTransition = useIncidentStore((s) => s.bulkTransition);
+  const deleteIncidents = useIncidentStore((s) => s.deleteIncidents);
+  const clearAll = useIncidentStore((s) => s.clearAll);
 
   const filters = filtersFromParams(searchParams);
   const view = searchParams.get("view") === "cards" ? "cards" : "table";
@@ -134,20 +137,30 @@ function QueueContent() {
     setSelected(new Set());
   };
 
+  const deleteSelected = () => {
+    const ids = [...visibleSelected];
+    void deleteIncidents(ids).then(() => {
+      setSelected(new Set());
+      toast(`${ids.length} incident${ids.length === 1 ? "" : "s"} deleted`);
+    });
+  };
+
   if (all.length === 0) {
     return (
-      <EmptyState
-        icon={Inbox}
-        title="No incidents yet"
-        description="Run a clip on the Monitor to start detecting hazards - every detection lands here as an incident with evidence."
-        actionLabel="Open Monitor"
-        actionHref="/monitor"
-      />
+      <div className="p-4">
+        <EmptyState
+          icon={Inbox}
+          title="No incidents yet"
+          description="Run a clip on the Monitor to start detecting hazards - every detection lands here as an incident with evidence."
+          actionLabel="Open Monitor"
+          actionHref="/monitor"
+        />
+      </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 p-4">
       <FilterBar
         filters={filters}
         zones={zones}
@@ -155,23 +168,30 @@ function QueueContent() {
         onChange={updateParams}
       />
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {visibleSelected.size > 0 ? (
           <>
             <span className="text-xs text-muted-foreground">
               {visibleSelected.size} selected
             </span>
-            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={bulkAssign}>
+            <Button size="sm" variant="outline" onClick={bulkAssign}>
               Assign suggested
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 text-xs text-destructive"
-              onClick={bulkReject}
-            >
+            <Button size="sm" variant="outline" onClick={bulkReject}>
               Reject
             </Button>
+            <ConfirmDelete
+              trigger={
+                <Button size="sm" variant="outline" className="text-destructive">
+                  <Trash2 className="size-3.5" />
+                  Delete
+                </Button>
+              }
+              title={`Delete ${visibleSelected.size} incident${visibleSelected.size === 1 ? "" : "s"}?`}
+              description="Removes the records and their stored evidence images. Rejecting is usually the right action for a false positive - it keeps the incident on record."
+              confirmLabel="Delete"
+              onConfirm={deleteSelected}
+            />
           </>
         ) : (
           <span className="text-xs text-muted-foreground">
@@ -182,7 +202,6 @@ function QueueContent() {
           <Button
             size="sm"
             variant="ghost"
-            className="h-7 px-2"
             onClick={() => updateParams({ view: view === "table" ? "cards" : "table" })}
           >
             {view === "table" ? (
@@ -193,6 +212,23 @@ function QueueContent() {
             {view === "table" ? "Cards" : "Table"}
           </Button>
           <ExportMenu incidents={filtered} />
+          <ConfirmDelete
+            trigger={
+              <Button size="sm" variant="outline" className="text-destructive">
+                <Trash2 className="size-3.5" />
+                Delete all
+              </Button>
+            }
+            title={`Delete all ${all.length} incidents?`}
+            description="Clears every incident and its stored evidence from this browser. Export first if you need the records."
+            confirmLabel="Delete all"
+            onConfirm={() => {
+              void clearAll().then(() => {
+                setSelected(new Set());
+                toast("All incidents deleted");
+              });
+            }}
+          />
         </div>
       </div>
 

@@ -27,7 +27,16 @@ export type PreMeta = {
 
 export type WorkerRequest =
   | { type: "init"; buffer: ArrayBuffer }
-  | { type: "infer"; id: number; bitmap: ImageBitmap; conf: number };
+  | {
+      type: "infer";
+      id: number;
+      /** Already downscaled to RESIZE_DIM by createImageBitmap. */
+      bitmap: ImageBitmap;
+      conf: number;
+      /** True video dimensions, so boxes map back to source pixels. */
+      srcW: number;
+      srcH: number;
+    };
 
 export type WorkerResponse =
   | { type: "ready"; backend: "webgpu" | "wasm" }

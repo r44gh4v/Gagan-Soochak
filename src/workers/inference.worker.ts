@@ -35,7 +35,7 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
       if (!session) throw new Error("inference before init");
       const { bitmap } = msg;
       const t0 = performance.now();
-      const { data, meta } = preprocess(bitmap);
+      const { data, meta } = preprocess(bitmap, msg.srcW, msg.srcH);
       bitmap.close(); // MUST close - leaked bitmaps kill the tab mid-demo
 
       const input = new ort.Tensor("float32", data, [1, 3, INPUT_SIZE, INPUT_SIZE]);

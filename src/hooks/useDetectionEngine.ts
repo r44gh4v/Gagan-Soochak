@@ -1,15 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
-import { CLASS_LABELS } from "@/lib/detection/constants";
+import { RESIZE_DIM } from "@/lib/detection/constants";
 import { captureEvidence } from "@/lib/detection/frameCapture";
 import { HazardTracker, type TrackedHazard } from "@/lib/detection/tracker";
 import type { WorkerResponse } from "@/lib/model/types";
 import { useIncidentStore, type DetectionContext } from "@/store/incidents";
 import { useSessionStore } from "@/store/session";
 import { useModelLoader } from "@/hooks/useModelLoader";
+
+/** ~30 Hz base tick; skipN divides it (N=2 -> ~15 Hz, matching the edge pipeline). */
+const SAMPLE_INTERVAL_MS = 1000 / 30;
 
 export type LiveDetection = {
   key: string;
@@ -36,6 +38,7 @@ export function useDetectionEngine(
   const processedIdxRef = useRef(0);
   const reqSeqRef = useRef(0);
   const rafHandleRef = useRef(0);
+  const intervalRef = useRef(0);
   const runningRef = useRef(false);
 
   const [ticker, setTicker] = useState<LiveDetection[]>([]);
@@ -49,20 +52,15 @@ export function useDetectionEngine(
           .createFromHazard(hazard, ctx, evidence);
         hazard.incidentId = id;
         useSessionStore.getState().recordIncident();
-        const inc = useIncidentStore.getState().incidents[id];
-        toast(`${id} - ${CLASS_LABELS[hazard.className]}`, {
-          description: `${inc.severityLevel} · ${inc.location.landmark}`,
-        });
+        // Detections are surfaced in the Monitor's live rail and the Queue,
+        // not as toasts - a busy clip would otherwise bury the screen in them.
         // A hazard that is High on its very first frame lands in created AND
         // highAlerts of the same tracker update; the highAlerts loop skipped
-        // it because incidentId was still null. Replay the one-time alert now
+        // it because incidentId was still null. Record the alert now
         // (alerted=true with a just-set id can only mean it was swallowed).
         if (hazard.alerted) {
           useIncidentStore.getState().markHighAlert(id);
-          toast.error(`HIGH severity - ${CLASS_LABELS[hazard.className]}`, {
-            id: `high-${id}`,
-            description: `${id} · severity ${hazard.severity.score.toFixed(2)}`,
-          });
+          useSessionStore.getState().recordHighAlert();
         }
       } catch (err) {
         console.error("incident creation failed", err);
@@ -141,10 +139,7 @@ export function useDetectionEngine(
       for (const hazard of update.highAlerts) {
         if (hazard.incidentId) {
           useIncidentStore.getState().markHighAlert(hazard.incidentId);
-          toast.error(`HIGH severity - ${CLASS_LABELS[hazard.className]}`, {
-            id: `high-${hazard.incidentId}`,
-            description: `${hazard.incidentId} · severity ${hazard.severity.score.toFixed(2)}`,
-          });
+          useSessionStore.getState().recordHighAlert();
         }
       }
     },
@@ -156,14 +151,21 @@ export function useDetectionEngine(
     [initWorker, handleResult],
   );
 
-  // Frame loop - requestVideoFrameCallback ties us to decoded frames.
+  /**
+   * Two loops:
+   *
+   *  - Sampling (setInterval @ ~30 Hz, process every Nth tick). Deliberately
+   *    NOT requestVideoFrameCallback: rVFC only fires when the compositor
+   *    actually presents a frame, so a throttled or backgrounded tab starves
+   *    it and detection silently stops. A timer gives the documented
+   *    ~12-15 Hz effective sampling at N=2 regardless of presentation.
+   *  - Overlay (requestAnimationFrame) draws tracker.active every repaint, so
+   *    boxes persist smoothly across skipped frames.
+   */
   const loop = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !runningRef.current) return;
-
-    const onFrame = () => {
-      if (!runningRef.current || !videoRef.current) return;
+    const tick = () => {
       const v = videoRef.current;
+      if (!runningRef.current || !v) return;
       const s = useSessionStore.getState();
 
       frameIdxRef.current++;
@@ -174,27 +176,44 @@ export function useDetectionEngine(
         !v.paused &&
         v.videoWidth > 0;
       s.recordFrame(shouldProcess);
+      if (!shouldProcess || !workerRef.current) return;
 
-      if (shouldProcess && workerRef.current) {
-        busyRef.current = true;
-        createImageBitmap(v)
-          .then((bitmap) => {
-            workerRef.current?.postMessage(
-              { type: "infer", id: ++reqSeqRef.current, bitmap, conf: s.confThreshold },
-              [bitmap],
-            );
-          })
-          .catch(() => {
-            busyRef.current = false;
-          });
-      }
-
-      // draw persisted boxes on EVERY frame
-      drawOverlay(trackerRef.current.active);
-      rafHandleRef.current = v.requestVideoFrameCallback(onFrame);
+      busyRef.current = true;
+      const srcW = v.videoWidth;
+      const srcH = v.videoHeight;
+      // pipeline.py's stretch-to-640×720 done natively here - far cheaper than
+      // drawing a full-resolution frame into a canvas on the main thread.
+      createImageBitmap(v, {
+        resizeWidth: RESIZE_DIM.w,
+        resizeHeight: RESIZE_DIM.h,
+        resizeQuality: "medium",
+      })
+        .then((bitmap) => {
+          workerRef.current?.postMessage(
+            {
+              type: "infer",
+              id: ++reqSeqRef.current,
+              bitmap,
+              conf: s.confThreshold,
+              srcW,
+              srcH,
+            },
+            [bitmap],
+          );
+        })
+        .catch(() => {
+          busyRef.current = false;
+        });
     };
 
-    rafHandleRef.current = video.requestVideoFrameCallback(onFrame);
+    intervalRef.current = window.setInterval(tick, SAMPLE_INTERVAL_MS);
+
+    const paint = () => {
+      if (!runningRef.current) return;
+      drawOverlay(trackerRef.current.active);
+      rafHandleRef.current = requestAnimationFrame(paint);
+    };
+    rafHandleRef.current = requestAnimationFrame(paint);
   }, [videoRef, drawOverlay, workerRef]);
 
   const start = useCallback(() => {
@@ -205,11 +224,15 @@ export function useDetectionEngine(
 
   const stop = useCallback(() => {
     runningRef.current = false;
-    const video = videoRef.current;
-    if (video && rafHandleRef.current) {
-      video.cancelVideoFrameCallback(rafHandleRef.current);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = 0;
     }
-  }, [videoRef]);
+    if (rafHandleRef.current) {
+      cancelAnimationFrame(rafHandleRef.current);
+      rafHandleRef.current = 0;
+    }
+  }, []);
 
   const reset = useCallback(() => {
     trackerRef.current.reset();

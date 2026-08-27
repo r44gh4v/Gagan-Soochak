@@ -1,19 +1,22 @@
 "use client";
 
-import { MoreHorizontal } from "lucide-react";
+import { Radar, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 
 import { ModelStatusChip } from "@/components/layout/ModelStatusChip";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 import { ACTIVE_STATUSES } from "@/lib/workflow/lifecycle";
 import { useIncidentStore } from "@/store/incidents";
 import { cn } from "@/lib/utils";
@@ -31,34 +34,42 @@ export function AppHeader() {
   const clearAll = useIncidentStore((s) => s.clearAll);
 
   const all = Object.values(incidents);
-  const open = all.filter((i) => ACTIVE_STATUSES.includes(i.status)).length;
-  const p1 = all.filter(
-    (i) => i.priority === "P1" && ACTIVE_STATUSES.includes(i.status),
-  ).length;
+  const active = all.filter((i) => ACTIVE_STATUSES.includes(i.status));
+  const p1 = active.filter((i) => i.priority === "P1").length;
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-card">
-      <div className="flex h-14 items-center gap-6 px-6">
-        <Link href="/monitor" className="shrink-0">
-          <div className="text-sm font-semibold leading-tight">Gagan Soochak</div>
-          <div className="text-[11px] leading-tight text-muted-foreground">
-            Electronic City · Monsoon &amp; Roads
-          </div>
+    <header className="sticky top-0 z-40 h-14 border-b bg-card">
+      <div className="flex h-full items-center gap-4 px-4">
+        <Link href="/monitor" className="flex shrink-0 items-center gap-2">
+          <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <Radar className="size-4" />
+          </span>
+          <span className="hidden sm:block">
+            <span className="block text-sm font-semibold leading-tight">
+              Gagan Soochak
+            </span>
+            <span className="block text-[11px] leading-tight text-muted-foreground">
+              Electronic City · Track 2
+            </span>
+          </span>
         </Link>
+
+        <Separator orientation="vertical" className="hidden h-6 sm:block" />
 
         <nav className="flex items-center gap-1">
           {NAV.map((item) => {
-            const active =
+            const isActive =
               pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm",
-                  active
-                    ? "font-medium text-foreground underline decoration-primary decoration-2 underline-offset-8"
-                    : "text-muted-foreground hover:text-foreground",
+                  "rounded-md px-3 py-1.5 text-sm transition-colors",
+                  isActive
+                    ? "bg-secondary font-medium text-foreground"
+                    : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
                 )}
               >
                 {item.label}
@@ -67,27 +78,34 @@ export function AppHeader() {
           })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2">
           {all.length > 0 && (
-            <Link
-              href="/incidents"
-              className="text-xs tabular-nums text-muted-foreground hover:text-foreground"
-            >
-              {open} active{p1 > 0 && <span className="text-[#b91c1c]"> · {p1} P1</span>}
+            <Link href="/incidents" className="flex items-center gap-1.5">
+              <Badge variant="secondary" className="tabular-nums font-normal">
+                {active.length} active
+              </Badge>
+              {p1 > 0 && (
+                <Badge
+                  variant="outline"
+                  className="border-[#fecaca] bg-[#fef2f2] tabular-nums font-medium text-[#b91c1c]"
+                >
+                  {p1} P1
+                </Badge>
+              )}
             </Link>
           )}
+
           <ModelStatusChip />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="size-8">
-                <MoreHorizontal className="size-4" />
-                <span className="sr-only">More</span>
+                <Settings2 className="size-4" />
+                <span className="sr-only">Session options</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href="/incidents">Export incidents…</Link>
-              </DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Demo data</DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={() => {
                   void (async () => {
@@ -95,22 +113,22 @@ export function AppHeader() {
                     const { defaultPatrolStart } = await import("@/lib/mock/time");
                     const seeded = await buildSeedIncidents(defaultPatrolStart());
                     useIncidentStore.getState().loadIncidents(seeded);
-                    toast(`Loaded ${seeded.length} seeded demo incidents`, {
-                      description: "Badged as SEED DATA - separate from real detections",
+                    toast(`Loaded ${seeded.length} seeded incidents`, {
+                      description: "Badged SEED DATA - separate from real detections",
                     });
                   })();
                 }}
               >
-                Load demo data (seeded)
+                Load seeded incidents
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
                 onClick={() => {
-                  void clearAll().then(() => toast("Demo data cleared"));
+                  void clearAll().then(() => toast("All incidents deleted"));
                 }}
               >
-                Reset demo data
+                Delete all incidents
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

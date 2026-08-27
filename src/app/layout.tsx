@@ -26,7 +26,9 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <TooltipProvider delayDuration={200}>
           <AppHeader />
-          <main className="px-6 py-5">{children}</main>
+          {/* Pages own their padding: /monitor fills the viewport exactly so
+              its controls never fall below the fold; the rest scroll normally. */}
+          <main>{children}</main>
           <Toaster position="bottom-right" richColors closeButton />
         </TooltipProvider>
       </body>

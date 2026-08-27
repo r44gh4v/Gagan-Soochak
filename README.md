@@ -126,8 +126,12 @@ not timers). Every simulated field is badged in the UI and exported as
 
 ## Limitations (honest list)
 
-- **3 of the 4 track classes** - `damaged_footpath` is not implemented (not sourced, not
-  annotated, not trained). It leads our future-scope list.
+- **3 of the 4 track classes** - `damaged_footpath` was prepared but is not in the shipped
+  model: folding a fourth class into one all-in-one detector pushed it past the CPU
+  real-time budget this project targets (the same constraint behind the YOLOv8s → YOLOv8n
+  choice). We shipped three classes that run in real time on-device rather than four that
+  do not. No footpath accuracy is claimed, because none was measured on a shipped model.
+  It leads our future-scope list.
 - `drain_overflow` is the weak class (~80 training images); expect false positives - that is
   what the Reject action is for.
 - Centroid tracking (no Kalman/re-ID) can confuse adjacent same-class hazards; repeat passes

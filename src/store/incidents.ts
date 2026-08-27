@@ -9,6 +9,7 @@ import { locationAt } from "@/lib/mock/location";
 import { timestampAt } from "@/lib/mock/time";
 import {
   clearAllEvidence,
+  deleteIncidentEvidence,
   frameKey,
   putEvidence,
   thumbKey,
@@ -53,6 +54,7 @@ type IncidentState = {
   escalateIncident: (id: string, reason: string) => void;
   bulkTransition: (ids: string[], to: IncidentStatus, note?: string) => void;
   loadIncidents: (incidents: Incident[]) => void;
+  deleteIncidents: (ids: string[]) => Promise<void>;
   clearAll: () => Promise<void>;
 };
 
@@ -250,6 +252,17 @@ export const useIncidentStore = create<IncidentState>()(
           }
           return { incidents: merged, order, seq };
         }),
+
+      deleteIncidents: async (ids) => {
+        // Drop the IndexedDB evidence blobs too, or they linger as orphans.
+        await Promise.all(ids.map((id) => deleteIncidentEvidence(id)));
+        set((s) => {
+          const incidents = { ...s.incidents };
+          for (const id of ids) delete incidents[id];
+          const gone = new Set(ids);
+          return { incidents, order: s.order.filter((id) => !gone.has(id)) };
+        });
+      },
 
       clearAll: async () => {
         await clearAllEvidence();

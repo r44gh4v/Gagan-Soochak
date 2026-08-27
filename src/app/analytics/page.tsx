@@ -17,11 +17,16 @@ import {
 
 import { EmptyState } from "@/components/common/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
-  CLASS_LABELS,
-  CLASSES,
-  type SeverityLevel,
-} from "@/lib/detection/constants";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { CLASS_LABELS, CLASSES, type SeverityLevel } from "@/lib/detection/constants";
 import { STATUS_LABELS } from "@/lib/workflow/lifecycle";
 import type { IncidentStatus } from "@/lib/workflow/types";
 import { useIncidentStore } from "@/store/incidents";
@@ -46,8 +51,10 @@ const STATUSES: IncidentStatus[] = [
 const VAL_MAP50 = [
   { cls: "pothole", map50: 0.893, note: "608 source images" },
   { cls: "waterlogged_road", map50: 0.743, note: "1,499 source images" },
-  { cls: "drain_overflow", map50: 0.72, note: "~80 images post-filter, ~16 val instances" },
+  { cls: "drain_overflow", map50: 0.72, note: "~80 post-filter, ~16 val instances" },
 ];
+
+const AXIS = { fontSize: 11, fill: "#71717a" };
 
 export default function AnalyticsPage() {
   const incidents = useIncidentStore((s) => s.incidents);
@@ -64,7 +71,10 @@ export default function AnalyticsPage() {
   const kpis = useMemo(() => {
     const by = (s: IncidentStatus) => all.filter((i) => i.status === s).length;
     return {
-      open: by("open") + by("assigned") + by("in_progress"),
+      needsAction: by("open") + by("assigned") + by("in_progress"),
+      p1: all.filter(
+        (i) => i.priority === "P1" && !["closed", "rejected"].includes(i.status),
+      ).length,
       resolved: by("resolved"),
       closed: by("closed"),
       rejected: by("rejected"),
@@ -75,7 +85,7 @@ export default function AnalyticsPage() {
   }, [all]);
 
   const byClass = CLASSES.map((c) => ({
-    name: CLASS_LABELS[c],
+    name: CLASS_LABELS[c].replace(" Road", ""),
     count: all.filter((i) => i.hazardClass === c).length,
   }));
 
@@ -102,196 +112,200 @@ export default function AnalyticsPage() {
 
   if (all.length === 0 && perf.framesProcessed === 0) {
     return (
-      <EmptyState
-        icon={BarChart3}
-        title="No session data yet"
-        description="Analytics fill in as detections run - open the Monitor and play a clip."
-        actionLabel="Open Monitor"
-        actionHref="/monitor"
-      />
+      <div className="p-4">
+        <EmptyState
+          icon={BarChart3}
+          title="No session data yet"
+          description="Analytics fill in as detections run - open the Monitor and play a clip."
+          actionLabel="Open Monitor"
+          actionHref="/monitor"
+        />
+      </div>
     );
   }
 
   const tile = (label: string, value: string, tone?: string) => (
-    <Card key={label} className="py-3">
+    <Card key={label} className="gap-0 py-3">
       <CardContent className="px-4">
-        <div className="text-xs uppercase tracking-wide text-muted-foreground">
+        <div className="truncate text-[11px] uppercase tracking-wide text-muted-foreground">
           {label}
         </div>
-        <div className={`mt-1 text-2xl font-semibold tabular-nums ${tone ?? ""}`}>
+        <div className={`mt-0.5 text-2xl font-semibold tabular-nums ${tone ?? ""}`}>
           {value}
         </div>
       </CardContent>
     </Card>
   );
 
+  const chart = (title: string, node: React.ReactNode) => (
+    <Card className="gap-0 py-3">
+      <CardHeader className="px-4 pb-1">
+        <CardTitle className="text-sm">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="h-44 px-2">
+        <ResponsiveContainer>{node as React.ReactElement}</ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        {tile("Needs action", String(kpis.open), kpis.open ? "text-[#b91c1c]" : "")}
+    <div className="space-y-3 p-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+        {tile("Needs action", String(kpis.needsAction))}
+        {tile("Open P1", String(kpis.p1), kpis.p1 ? "text-[#b91c1c]" : "")}
         {tile("Resolved", String(kpis.resolved))}
         {tile("Closed", String(kpis.closed))}
         {tile("Rejected (FP)", String(kpis.rejected))}
         {tile("Avg severity", kpis.avgSeverity.toFixed(2))}
-        {tile("Detections", String(perf.detections))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Incidents by class</CardTitle>
-          </CardHeader>
-          <CardContent className="h-56">
-            <ResponsiveContainer>
-              <BarChart data={byClass} margin={{ left: -20 }}>
-                <CartesianGrid stroke="#e4e4e7" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} tickLine={false} allowDecimals={false} />
-                <RTooltip cursor={{ fill: "#f4f4f5" }} />
-                <Bar dataKey="count" fill="#2563eb" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {chart(
+          "By hazard class",
+          <BarChart data={byClass} margin={{ top: 4, right: 8, left: -22, bottom: 0 }}>
+            <CartesianGrid stroke="#e4e4e7" vertical={false} />
+            <XAxis dataKey="name" tick={AXIS} tickLine={false} axisLine={false} />
+            <YAxis tick={AXIS} tickLine={false} axisLine={false} allowDecimals={false} />
+            <RTooltip cursor={{ fill: "#f4f4f5" }} />
+            <Bar dataKey="count" fill="#2563eb" radius={[3, 3, 0, 0]} />
+          </BarChart>,
+        )}
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">By severity</CardTitle>
-          </CardHeader>
-          <CardContent className="h-56">
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie
-                  data={bySeverity}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius="55%"
-                  outerRadius="80%"
-                  paddingAngle={2}
-                  label={({ name, value }) => (value ? `${name} ${value}` : "")}
-                  labelLine={false}
-                >
-                  {bySeverity.map((s) => (
-                    <Cell key={s.name} fill={SEVERITY_FILL[s.name as SeverityLevel]} />
-                  ))}
-                </Pie>
-                <RTooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {chart(
+          "By severity",
+          <PieChart>
+            <Pie
+              data={bySeverity}
+              dataKey="value"
+              nameKey="name"
+              innerRadius="52%"
+              outerRadius="78%"
+              paddingAngle={2}
+              label={({ name, value }) => (value ? `${name} ${value}` : "")}
+              labelLine={false}
+              isAnimationActive={false}
+            >
+              {bySeverity.map((s) => (
+                <Cell key={s.name} fill={SEVERITY_FILL[s.name as SeverityLevel]} />
+              ))}
+            </Pie>
+            <RTooltip />
+          </PieChart>,
+        )}
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">By zone</CardTitle>
-          </CardHeader>
-          <CardContent className="h-56">
-            <ResponsiveContainer>
-              <BarChart data={byZone} layout="vertical" margin={{ left: 30 }}>
-                <CartesianGrid stroke="#e4e4e7" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tick={{ fontSize: 11 }}
-                  width={110}
-                  tickLine={false}
-                />
-                <RTooltip cursor={{ fill: "#f4f4f5" }} />
-                <Bar dataKey="count" fill="#2563eb" radius={[0, 3, 3, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {chart(
+          "By zone",
+          <BarChart
+            data={byZone}
+            layout="vertical"
+            margin={{ top: 4, right: 12, left: 8, bottom: 0 }}
+          >
+            <CartesianGrid stroke="#e4e4e7" horizontal={false} />
+            <XAxis type="number" tick={AXIS} axisLine={false} allowDecimals={false} />
+            <YAxis
+              type="category"
+              dataKey="name"
+              tick={{ ...AXIS, fontSize: 10 }}
+              width={96}
+              tickLine={false}
+              axisLine={false}
+            />
+            <RTooltip cursor={{ fill: "#f4f4f5" }} />
+            <Bar dataKey="count" fill="#2563eb" radius={[0, 3, 3, 0]} />
+          </BarChart>,
+        )}
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Status funnel</CardTitle>
-          </CardHeader>
-          <CardContent className="h-56">
-            <ResponsiveContainer>
-              <BarChart data={byStatus} margin={{ left: -20 }}>
-                <CartesianGrid stroke="#e4e4e7" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} tickLine={false} allowDecimals={false} />
-                <RTooltip cursor={{ fill: "#f4f4f5" }} />
-                <Bar dataKey="count" fill="#7c3aed" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {chart(
+          "Workflow status",
+          <BarChart data={byStatus} margin={{ top: 4, right: 8, left: -22, bottom: 0 }}>
+            <CartesianGrid stroke="#e4e4e7" vertical={false} />
+            <XAxis
+              dataKey="name"
+              tick={{ ...AXIS, fontSize: 9 }}
+              tickLine={false}
+              axisLine={false}
+              interval={0}
+            />
+            <YAxis tick={AXIS} tickLine={false} axisLine={false} allowDecimals={false} />
+            <RTooltip cursor={{ fill: "#f4f4f5" }} />
+            <Bar dataKey="count" fill="#7c3aed" radius={[3, 3, 0, 0]} />
+          </BarChart>,
+        )}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">
-              Model performance - measured this session
-            </CardTitle>
+      <div className="grid gap-3 lg:grid-cols-2">
+        <Card className="gap-0 py-3">
+          <CardHeader className="flex-row items-center gap-2 px-4 pb-2">
+            <CardTitle className="text-sm">Model performance</CardTitle>
+            <Badge variant="secondary" className="font-normal">
+              this session
+            </Badge>
           </CardHeader>
-          <CardContent>
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+          <CardContent className="px-4">
+            <dl className="grid grid-cols-2 gap-x-6">
               {(
                 [
-                  ["Backend", model.phase === "ready" ? (model.backend === "webgpu" ? "WebGPU" : "WASM (threaded)") : "-"],
+                  ["Backend", model.phase === "ready" ? (model.backend === "webgpu" ? "WebGPU" : "WASM") : "-"],
                   ["Avg inference", avgMs ? `${avgMs.toFixed(1)} ms` : "-"],
                   ["p95 inference", p95InferenceMs(perf) ? `${p95InferenceMs(perf).toFixed(1)} ms` : "-"],
-                  ["Effective FPS", effectiveFps(perf) ? effectiveFps(perf).toFixed(1) : "-"],
+                  ["Sampling rate", effectiveFps(perf) ? `${effectiveFps(perf).toFixed(1)} Hz` : "-"],
                   ["Frames seen", String(perf.framesSeen)],
                   ["Frames processed", `${perf.framesProcessed} (every ${skipN})`],
                   ["Raw detections", String(perf.detections)],
                   ["Incidents created", String(perf.incidentsCreated)],
-                  ["Model file", "best.onnx · 11.7 MB fp32"],
-                  ["Input", "640×640 letterboxed (of 640×720 stretch)"],
+                  ["Model file", "best.onnx · 11.7 MB"],
+                  ["Input", "640×640 letterboxed"],
                 ] as [string, string][]
               ).map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-2 border-b py-1 last:border-0">
+                <div
+                  key={k}
+                  className="flex items-baseline justify-between gap-2 border-b py-1.5 text-sm last:border-0"
+                >
                   <dt className="text-muted-foreground">{k}</dt>
                   <dd className="font-medium tabular-nums">{v}</dd>
                 </div>
               ))}
             </dl>
-            <p className="mt-3 text-[11px] leading-snug text-muted-foreground">
+            <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
               Reference: the Python edge pipeline measured 7.7 FPS unskipped /
               ~14-15 FPS at N=2 on a laptop CPU (Technical Build Notes §4).
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              Validation metrics
-              <span className="rounded border bg-muted px-1 py-px text-[10px] font-medium text-muted-foreground">
-                TRAINING METRIC
-              </span>
-            </CardTitle>
+        <Card className="gap-0 py-3">
+          <CardHeader className="flex-row items-center gap-2 px-4 pb-2">
+            <CardTitle className="text-sm">Validation metrics</CardTitle>
+            <Badge variant="outline" className="font-normal">
+              training metric
+            </Badge>
           </CardHeader>
-          <CardContent>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
-                  <th className="py-1 font-medium">Class</th>
-                  <th className="py-1 font-medium">mAP50</th>
-                  <th className="py-1 font-medium">Data</th>
-                </tr>
-              </thead>
-              <tbody>
+          <CardContent className="px-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="h-8">Class</TableHead>
+                  <TableHead className="h-8">mAP50</TableHead>
+                  <TableHead className="h-8">Training data</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {VAL_MAP50.map((r) => (
-                  <tr key={r.cls} className="border-b last:border-0">
-                    <td className="py-1.5 font-mono text-xs">{r.cls}</td>
-                    <td className="py-1.5 tabular-nums">{r.map50.toFixed(3)}</td>
-                    <td className="py-1.5 text-xs text-muted-foreground">{r.note}</td>
-                  </tr>
+                  <TableRow key={r.cls}>
+                    <TableCell className="font-mono text-xs">{r.cls}</TableCell>
+                    <TableCell className="tabular-nums">{r.map50.toFixed(3)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {r.note}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-            <p className="mt-3 text-[11px] leading-snug text-muted-foreground">
+              </TableBody>
+            </Table>
+            <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
               YOLOv8n, 100 epochs, 20% held-out split. All classes clear the
-              proposal&apos;s 0.70 target. drain_overflow&apos;s figure is over ~16
-              validation instances - treat it with wide error bars. These are
-              training-time numbers, distinct from the live session
-              measurements on the left.
+              proposal&apos;s 0.70 target. drain_overflow is measured over ~16
+              validation instances - treat with wide error bars. Distinct from
+              the live session numbers on the left.
             </p>
           </CardContent>
         </Card>

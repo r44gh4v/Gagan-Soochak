@@ -43,7 +43,7 @@ export default function IncidentDetailPage() {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 p-4">
       <div className="flex flex-wrap items-center gap-3">
         <Button
           variant="ghost"
@@ -65,13 +65,13 @@ export default function IncidentDetailPage() {
         )}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[5fr_4fr_3fr]">
+      <div className="grid gap-3 xl:grid-cols-[5fr_4fr_3fr]">
         {/* Evidence - what happened */}
-        <Card>
-          <CardHeader className="pb-2">
+        <Card className="gap-0 py-3">
+          <CardHeader className="px-4 pb-2">
             <CardTitle className="text-sm">Evidence</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 px-4">
             <EvidenceImage
               evidenceKey={incident.evidence.frameKey}
               alt="Annotated detection frame"
@@ -146,9 +146,9 @@ export default function IncidentDetailPage() {
         </Card>
 
         {/* Action - what to do */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
+        <div className="space-y-3">
+          <Card className="gap-0 py-3">
+            <CardHeader className="px-4 pb-2">
               <CardTitle className="text-sm">Lifecycle</CardTitle>
             </CardHeader>
             <CardContent>
@@ -171,8 +171,8 @@ export default function IncidentDetailPage() {
         </div>
 
         {/* Audit - what was done */}
-        <Card className="self-start">
-          <CardHeader className="pb-2">
+        <Card className="gap-0 self-start py-3">
+          <CardHeader className="px-4 pb-2">
             <CardTitle className="text-sm">Audit trail</CardTitle>
           </CardHeader>
           <CardContent>

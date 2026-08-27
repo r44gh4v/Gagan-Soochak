@@ -68,7 +68,7 @@ export function FilterBar({
   );
 
   return (
-    <div className="sticky top-14 z-30 -mx-6 border-b bg-background px-6 py-2">
+    <div className="sticky top-14 z-30 -mx-4 -mt-4 border-b bg-background px-4 py-2">
       <div className="flex flex-wrap items-center gap-2">
         {sel(filters.cls, (v) => onChange({ cls: v }), "Class", [
           ["all", "All classes"],

@@ -16,7 +16,7 @@ export const metadata = {
  */
 export default function AboutPage() {
   return (
-    <article className="mx-auto max-w-3xl space-y-10 py-4 leading-relaxed">
+    <article className="mx-auto max-w-3xl space-y-8 p-4 leading-relaxed">
       <section>
         <h1 className="text-xl font-semibold">How Gagan Soochak works</h1>
         <p className="mt-3 text-sm text-muted-foreground">
@@ -66,11 +66,20 @@ export default function AboutPage() {
       <section>
         <h2 className="text-base font-semibold">Coverage - 3 of 4 track classes</h2>
         <p className="mt-3 text-sm text-muted-foreground">
-          The track brief names four detection targets. <strong>damaged_footpath is
-          not implemented</strong> - not sourced, not annotated, not trained. The
-          merge pipeline already supports adding it (new source + class map +
-          retrain), and it leads our future-scope list. We&apos;d rather you hear
-          that from us than count the filter options.
+          The track brief names four detection targets.{" "}
+          <strong>damaged_footpath is prepared but not in the shipped model.</strong>{" "}
+          Data preparation for it was done, but folding a fourth class into a
+          single all-in-one detector pushed the model past the CPU real-time
+          budget this project is built around - the same constraint that drove
+          the YOLOv8s → YOLOv8n decision below. We chose to ship three classes
+          that run in real time on-device over four that do not.
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The merge pipeline already supports adding it (new source + class map
+          + retrain). The realistic path is a second lightweight detector or a
+          nano model at higher capacity once GPU/edge inference is available -
+          it leads our future-scope list. No footpath accuracy figures are
+          claimed here, because none were measured on a shipped model.
         </p>
       </section>
 
@@ -127,7 +136,7 @@ export default function AboutPage() {
 
       <section>
         <h2 className="text-base font-semibold">What&apos;s real / what&apos;s simulated</h2>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="rounded-md border p-4">
             <h3 className="text-sm font-semibold text-emerald-700">Real &amp; measured</h3>
             <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">

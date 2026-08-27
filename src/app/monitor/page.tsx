@@ -1,6 +1,5 @@
 "use client";
 
-import { MonitorPlay } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DetectionTicker } from "@/components/monitor/DetectionTicker";
@@ -9,11 +8,7 @@ import { ModelGate } from "@/components/monitor/ModelGate";
 import { RunControls } from "@/components/monitor/RunControls";
 import { SourcePicker, type VideoSource } from "@/components/monitor/SourcePicker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-  CLASS_LABELS,
-  SEVERITY_STROKE,
-} from "@/lib/detection/constants";
+import { CLASS_LABELS, SEVERITY_STROKE } from "@/lib/detection/constants";
 import type { TrackedHazard } from "@/lib/detection/tracker";
 import { SAMPLE_CLIPS } from "@/lib/mock/clips";
 import { useDetectionEngine } from "@/hooks/useDetectionEngine";
@@ -23,7 +18,7 @@ import { useSessionStore } from "@/store/session";
 // preselect the first bundled clip instead of showing an empty stage.
 const DEFAULT_SOURCE: VideoSource = {
   url: SAMPLE_CLIPS[0].src,
-  label: SAMPLE_CLIPS[0].label.split(" - ")[0],
+  label: SAMPLE_CLIPS[0].file,
   routeId: SAMPLE_CLIPS[0].routeId,
   isUpload: false,
 };
@@ -39,8 +34,9 @@ export default function MonitorPage() {
   const setSourceLabel = useSessionStore((s) => s.setSourceLabel);
   const modelPhase = useSessionStore((s) => s.model.phase);
 
-  // Overlay: boxes drawn in intrinsic video px on EVERY frame; the canvas is
-  // CSS-stretched over the video so coordinates never drift.
+  // Overlay: boxes drawn in intrinsic video px on EVERY frame. Both <video>
+  // and <canvas> use object-contain in the same box, so their rendered content
+  // rects match and the coordinates never drift.
   const drawOverlay = useCallback((hazards: TrackedHazard[]) => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
@@ -52,9 +48,9 @@ export default function MonitorPage() {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const fontPx = Math.max(12, Math.round(canvas.width / 55));
+    const fontPx = Math.max(14, Math.round(canvas.width / 45));
     ctx.font = `600 ${fontPx}px system-ui, sans-serif`;
-    ctx.lineWidth = Math.max(2, Math.round(canvas.width / 320));
+    ctx.lineWidth = Math.max(2, Math.round(canvas.width / 300));
 
     for (const h of hazards) {
       const [x1, y1, x2, y2] = h.bbox;
@@ -64,11 +60,11 @@ export default function MonitorPage() {
 
       const label = `${CLASS_LABELS[h.className]} ${h.confidence.toFixed(2)} · ${h.severity.level}`;
       const tw = ctx.measureText(label).width;
-      const ly = Math.max(fontPx + 6, y1);
+      const ly = Math.max(fontPx + 8, y1);
       ctx.fillStyle = stroke;
-      ctx.fillRect(x1, ly - fontPx - 6, tw + 10, fontPx + 8);
+      ctx.fillRect(x1, ly - fontPx - 8, tw + 12, fontPx + 10);
       ctx.fillStyle = "#ffffff";
-      ctx.fillText(label, x1 + 5, ly - 4);
+      ctx.fillText(label, x1 + 6, ly - 5);
     }
   }, []);
 
@@ -83,10 +79,15 @@ export default function MonitorPage() {
 
   const selectSource = (src: VideoSource) => {
     reset();
-    setSource(src);
+    setSource((prev) => {
+      // release the previous upload's blob URL
+      if (prev?.isUpload) URL.revokeObjectURL(prev.url);
+      return src;
+    });
     setRouteId(src.routeId);
     setSourceLabel(src.label);
     setPlaying(false);
+    setTime({ current: 0, duration: 0 });
   };
 
   const handlePlayPause = () => {
@@ -98,23 +99,32 @@ export default function MonitorPage() {
 
   const handleReset = () => {
     const v = videoRef.current;
-    if (v) v.currentTime = 0;
+    if (v) {
+      v.pause();
+      v.currentTime = 0;
+    }
     reset();
   };
 
   return (
-    <div className="space-y-4">
+    // Locked to the viewport under the 3.5rem header: the video flexes to the
+    // space left over, so playback controls are always on screen.
+    <div className="flex h-[calc(100vh-3.5rem)] flex-col gap-3 p-4">
       <SourcePicker current={source} onSelect={selectSource} />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(340px,1fr)]">
-        <Card className="overflow-hidden py-0">
-          <div className="relative bg-zinc-950">
-            {source ? (
+      {/* video column : rail = 2 : 1 */}
+      <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[2fr_1fr]">
+        <div className="flex min-h-0 flex-col gap-3">
+          {/* Stage fills the column; clips of any aspect letterbox inside it. */}
+          <div className="flex min-h-0 flex-1">
+            <div className="relative h-full w-full overflow-hidden rounded-lg border bg-zinc-950">
+            {source && (
               <>
                 <video
+                  key={source.url}
                   ref={videoRef}
                   src={source.url}
-                  className="block max-h-[70vh] w-full object-contain"
+                  className="h-full w-full object-contain"
                   playsInline
                   muted
                   onPlay={() => {
@@ -144,49 +154,36 @@ export default function MonitorPage() {
                   className="pointer-events-none absolute inset-0 h-full w-full object-contain"
                 />
               </>
-            ) : (
-              <div className="flex aspect-video flex-col items-center justify-center gap-2 text-center">
-                <MonitorPlay className="size-8 text-zinc-600" />
-                <p className="text-sm text-zinc-400">
-                  Pick a sample clip or drop an .mp4 to start detecting
-                </p>
-              </div>
-            )}
-            {source && modelPhase !== "ready" && <ModelGate onRetry={() => void init()} />}
+              )}
+              {modelPhase !== "ready" && <ModelGate onRetry={() => void init()} />}
+            </div>
           </div>
-          {source && (
-            <CardContent className="border-t py-3">
-              <RunControls
-                playing={playing}
-                currentTime={time.current}
-                duration={time.duration}
-                onPlayPause={handlePlayPause}
-                onReset={handleReset}
-              />
-            </CardContent>
-          )}
-        </Card>
 
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
+          <RunControls
+            playing={playing}
+            currentTime={time.current}
+            duration={time.duration}
+            onPlayPause={handlePlayPause}
+            onReset={handleReset}
+          />
+        </div>
+
+        <div className="flex min-h-0 flex-col gap-3">
+          <Card className="shrink-0 gap-0 py-3">
+            <CardHeader className="px-4 pb-2">
               <CardTitle className="text-sm">Session</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4">
               <LiveStats />
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Detections (live)</CardTitle>
+
+          <Card className="flex min-h-0 flex-1 flex-col gap-0 py-3">
+            <CardHeader className="px-4 pb-2">
+              <CardTitle className="text-sm">Live detections</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="min-h-0 flex-1 px-4">
               <DetectionTicker items={ticker} />
-              <Separator className="my-3" />
-              <p className="text-[11px] leading-snug text-muted-foreground">
-                New hazards become incidents in the Queue automatically -
-                logged at first sight at whatever severity they start at.
-              </p>
             </CardContent>
           </Card>
         </div>

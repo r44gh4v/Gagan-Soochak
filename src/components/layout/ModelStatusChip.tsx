@@ -8,12 +8,13 @@ export function ModelStatusChip() {
   const model = useSessionStore((s) => s.model);
   const lastMs = useSessionStore((s) => s.perf.inferenceMsLast);
 
+  // The model only loads on /monitor; showing "not loaded" elsewhere reads
+  // like a fault rather than "nothing has asked for it yet".
+  if (model.phase === "idle") return null;
+
   let text: string;
   let tone = "text-muted-foreground";
   switch (model.phase) {
-    case "idle":
-      text = "Model: not loaded";
-      break;
     case "downloading": {
       const pct = model.total ? Math.round((model.received / model.total) * 100) : 0;
       text = `Downloading model · ${pct}%`;
