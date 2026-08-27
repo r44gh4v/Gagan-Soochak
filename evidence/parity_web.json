@@ -1,0 +1,15 @@
+{
+  "inputChecksum": 614400.01,
+  "outputShape": [
+    1,
+    7,
+    8400
+  ],
+  "outputStats": {
+    "sum": 6263369,
+    "boxMean": 186.4098,
+    "scoreMax": 0.02842,
+    "scoreMean": 0.000038
+  },
+  "detections": []
+}

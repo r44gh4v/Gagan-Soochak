@@ -1,0 +1,125 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   Gagan Soochak design tokens — light, clean municipal ops console.
+   Severity (red/amber/green) is the only saturated fill in the UI.
+--------------------------------------------------------------------------- */
+
+:root {
+  --radius: 0.5rem;
+
+  --background: #fafafa; /* zinc-50 */
+  --foreground: #18181b; /* zinc-900 */
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #2563eb; /* blue-600 */
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5; /* zinc-100 */
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a; /* zinc-500 */
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #dc2626; /* red-600 */
+  --destructive-foreground: #ffffff;
+  --border: #e4e4e7; /* zinc-200 */
+  --input: #e4e4e7;
+  --ring: #2563eb;
+
+  --chart-1: #2563eb;
+  --chart-2: #dc2626;
+  --chart-3: #d97706;
+  --chart-4: #059669;
+  --chart-5: #7c3aed;
+
+  /* Severity — text / tinted bg / border / canvas stroke.
+     Canvas overlay strokes use the SAME stroke hex as UI chips. */
+  --severity-high: #b91c1c; /* red-700 */
+  --severity-high-bg: #fef2f2; /* red-50 */
+  --severity-high-border: #fecaca; /* red-200 */
+  --severity-high-stroke: #dc2626; /* red-600 */
+  --severity-medium: #b45309; /* amber-700 */
+  --severity-medium-bg: #fffbeb; /* amber-50 */
+  --severity-medium-border: #fde68a; /* amber-200 */
+  --severity-medium-stroke: #d97706; /* amber-600 */
+  --severity-low: #047857; /* emerald-700 */
+  --severity-low-bg: #ecfdf5; /* emerald-50 */
+  --severity-low-border: #a7f3d0; /* emerald-200 */
+  --severity-low-stroke: #059669; /* emerald-600 */
+
+  /* Status dots — deliberately quieter than severity */
+  --status-open: #71717a; /* zinc-500 */
+  --status-assigned: #2563eb; /* blue-600 */
+  --status-in-progress: #7c3aed; /* violet-600 */
+  --status-resolved: #0d9488; /* teal-600 */
+  --status-closed: #3f3f46; /* zinc-700 */
+  --status-rejected: #a1a1aa; /* zinc-400 */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-inter);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv11";
+  }
+  /* Every number in the UI aligns in columns */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  /* One-shot highlight for a freshly created incident row */
+  @keyframes row-flash {
+    0% {
+      background-color: var(--severity-medium-bg);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+  .animate-row-flash {
+    animation: row-flash 1.5s ease-out 1;
+  }
+}
